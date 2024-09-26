@@ -1,8 +1,8 @@
 <?php
-	 // This template closes  a list of shows. 
+//	bostoncamerata.org
 ?>
-<!--gigpress end list -->
-<div class="postDivider"><img class="postDivider" src="/graphics/blogdivider.png"></div>     <br/>  
+<!--gigpress list-end start -->
+<div class="postDivider"><img class="postDivider" src="/graphics/blogdivider.png"></div>
 <script type="text/javascript">
 	var currentInfo = null;
 	function showInfo(id)
@@ -26,3 +26,4 @@
 		return false;
 	}
 </script>
+<!--gigpress list-end end -->

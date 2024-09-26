@@ -5,8 +5,8 @@
 //	into a new folder called 'gigpress-templates' in your 'wp-content' directory
 //	and then making your changes there. When in place, that file will load in place of this one.
 
-// This template is displayed before the archives dropdown menu 
-// only when the menu is included as part of the [gigpress_shows] shortcode
+// This template displays when you have no shows.
+
 ?>
 
-<div class="gigpress-menu-container">
+<p class="gigpress-empty"><?php echo $no_results_message; ?></p>

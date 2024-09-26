@@ -79,110 +79,68 @@ class Gigpress_widget extends WP_Widget {
 		</p>
 
 		<p>
-			<select style="width:100%;" id="<?php echo $this->get_field_id( 'scope' ); ?>"
-			        name="<?php echo $this->get_field_name( 'scope' ); ?>">
-				<option value="upcoming"<?php if ( $scope == 'upcoming' ) {
-					echo ' selected="selected"';
-				} ?>>
-					<?php _e( 'Display upcoming shows', 'gigpress' ); ?>
+			<label for="<?php echo $this->get_field_id('artist'); ?>">
+				<?php _e('Only display shows from this program', 'gigpress'); ?>
+			</label>
+			<select style="width:100%;" id="<?php echo $this->get_field_id('artist'); ?>" name="<?php echo $this->get_field_name('artist'); ?>">
+		  		<option value="">--</option>
+		  	<?php
+		  	$programs = fetch_gigpress_artists();
+			if($programs != FALSE) :
+			foreach($programs as $this_program) : ?>
+				<option value="<?php echo $this_program->artist_id; ?>"<?php if($program_id == $this_program->artist_id) echo(' selected="selected"'); ?>><?php echo gigpress_db_out($this_program->artist_name); ?></option>
+			<?php endforeach; endif; ?>
+			</select>
+		</p>
+
+		<p>
+			<label for="<?php echo $this->get_field_id('tour'); ?>">
+				<?php _e('Only display shows from this tour', 'gigpress'); ?>
+			</label>
+			<select style="width:100%;" id="<?php echo $this->get_field_id('tour'); ?>" name="<?php echo $this->get_field_name('tour'); ?>">
+		  		<option value="">--</option>
+		  	<?php
+		  	$tours = fetch_gigpress_tours();
+			if($tours != FALSE) :
+			foreach($tours as $this_tour) : ?>
+				<option value="<?php echo $this_tour->tour_id; ?>"<?php if($tour == $this_tour->tour_id) echo(' selected="selected"'); ?>><?php echo gigpress_db_out($this_tour->tour_name); ?></option>
+			<?php endforeach; endif; ?>
+			</select>
+		</p>
+		
+		<p>
+			<label for="<?php echo $this->get_field_id('venue'); ?>">
+				<?php _e('Only display shows from this venue', 'gigpress'); ?>
+			</label>
+			<select style="width:100%;" id="<?php echo $this->get_field_id('venue'); ?>" name="<?php echo $this->get_field_name('venue'); ?>">
+		  		<option value="">--</option>
+		  	<?php
+		  	$venues = fetch_gigpress_venues();
+			if($venues != FALSE) :
+			foreach($venues as $this_venue) : ?>
+				<option value="<?php echo $this_venue->venue_id; ?>"<?php if($venue == $this_venue->venue_id) echo(' selected="selected"'); ?>><?php echo gigpress_db_out($this_venue->venue_name).' ('.gigpress_db_out($this_venue->venue_city); if(!empty($this_venue->venue_state)) echo ', '.gigpress_db_out($this_venue->venue_state); echo ')'; ?></option>
+			<?php endforeach; endif; ?>
+			</select>
+		</p>			
+			
+		<p>
+			<label>
+				<input id="<?php echo $this->get_field_id('group_artists'); ?>" name="<?php echo $this->get_field_name('group_artists'); ?>" type="checkbox" value="yes"<?php if($group_artists == 'yes') echo ' checked="checked"'; ?> /> 
+				<?php _e('Group by program', 'gigpress'); ?><br />
+				<small><?php _e('Ignored when filtering by program, tour, or venue.', 'gigpress'); ?></small>
+			</label>
+		</p>
+
+		<p>
+			<select style="width:100%;" id="<?php echo $this->get_field_id('artist_order'); ?>" name="<?php echo $this->get_field_name('artist_order'); ?>">
+				<option value="alphabetical"<?php if($artist_order == 'alphabetical') echo ' selected="selected"'; ?>>
+					<?php _e("Order programs alphabetically", "gigpress"); ?>
 				</option>
-				<option value="today"<?php if ( $scope == 'today' ) {
-					echo ' selected="selected"';
-				} ?>>
-					<?php _e( "Display today's shows", 'gigpress' ); ?>
+				<option value="custom"<?php if($artist_order == 'custom') echo ' selected="selected"'; ?>>
+					<?php _e("Order programs by custom order", "gigpress"); ?>
 				</option>
-				<option value="past"<?php if ( $scope == 'past' ) {
-					echo ' selected="selected"';
-				} ?>>
-					<?php _e( "Display past shows", 'gigpress' ); ?>
-				</option>
-			</select>
-		</p>
-
-		<p>
-			<label for="<?php echo $this->get_field_id( 'limit' ); ?>"><?php _e( 'Number of shows to list', 'gigpress' ); ?>
-				:
-				<input style="width: 25px; text-align: center;" id="<?php echo $this->get_field_id( 'limit' ); ?>"
-				       name="<?php echo $this->get_field_name( 'limit' ); ?>" type="text"
-				       value="<?php echo $limit; ?>"/>
-			</label>
-		</p>
-
-		<p>
-			<label for="<?php echo $this->get_field_id( 'artist' ); ?>">
-				<?php _e( 'Only display shows from this artist', 'gigpress' ); ?>
-			</label>
-			<select style="width:100%;" id="<?php echo $this->get_field_id( 'artist' ); ?>"
-			        name="<?php echo $this->get_field_name( 'artist' ); ?>">
-				<option value="">--</option>
-				<?php
-				$artists = fetch_gigpress_artists();
-				if ( $artists != false ) :
-					foreach ( $artists as $this_artist ) : ?>
-						<option value="<?php echo $this_artist->artist_id; ?>"<?php if ( $artist == $this_artist->artist_id ) {
-							echo( ' selected="selected"' );
-						} ?>><?php echo gigpress_db_out( $this_artist->artist_name ); ?></option>
-					<?php endforeach; endif; ?>
-			</select>
-		</p>
-
-		<p>
-			<label for="<?php echo $this->get_field_id( 'tour' ); ?>">
-				<?php _e( 'Only display shows from this tour', 'gigpress' ); ?>
-			</label>
-			<select style="width:100%;" id="<?php echo $this->get_field_id( 'tour' ); ?>"
-			        name="<?php echo $this->get_field_name( 'tour' ); ?>">
-				<option value="">--</option>
-				<?php
-				$tours = fetch_gigpress_tours();
-				if ( $tours != false ) :
-					foreach ( $tours as $this_tour ) : ?>
-						<option value="<?php echo $this_tour->tour_id; ?>"<?php if ( $tour == $this_tour->tour_id ) {
-							echo( ' selected="selected"' );
-						} ?>><?php echo gigpress_db_out( $this_tour->tour_name ); ?></option>
-					<?php endforeach; endif; ?>
-			</select>
-		</p>
-
-		<p>
-			<label for="<?php echo $this->get_field_id( 'venue' ); ?>">
-				<?php _e( 'Only display shows from this venue', 'gigpress' ); ?>
-			</label>
-			<select style="width:100%;" id="<?php echo $this->get_field_id( 'venue' ); ?>"
-			        name="<?php echo $this->get_field_name( 'venue' ); ?>">
-				<option value="">--</option>
-				<?php
-				$venues = fetch_gigpress_venues();
-				if ( $venues != false ) :
-					foreach ( $venues as $this_venue ) : ?>
-						<option value="<?php echo $this_venue->venue_id; ?>"<?php if ( $venue == $this_venue->venue_id ) {
-							echo( ' selected="selected"' );
-						} ?>><?php echo gigpress_db_out( $this_venue->venue_name ) . ' (' . gigpress_db_out( $this_venue->venue_city );
-							if ( ! empty( $this_venue->venue_state ) ) {
-								echo ', ' . gigpress_db_out( $this_venue->venue_state );
-							}
-							echo ')'; ?></option>
-					<?php endforeach; endif; ?>
-			</select>
-		</p>
-
-		<p>
-			<label for="<?php echo esc_attr( $this->get_field_id( 'related' ) ); ?>">
-				<?php esc_html_e( 'Only display shows related to this post', 'gigpress' ); ?>
-			</label>
-			<select style="width:100%;" id="<?php echo esc_attr( $this->get_field_id( 'related' ) ); ?>" name="<?php echo esc_attr( $this->get_field_name( 'related' ) ); ?>">
-				<option value="">--</option>
-				<?php
-				$posts = fetch_gigpress_related_posts();
-				if ( $posts != false ) :
-					foreach ( $posts as $this_post ) :
-						?>
-						<option value="<?php echo absint( $this_post->ID ); ?>" <?php echo ( absint( $related ) === $this_post->ID ) ? 'selected="selected"' : ''; ?>>
-							<?php echo esc_html( get_the_title( $this_post ) ); ?>
-						</option>
-					<?php endforeach; ?>
-				<?php endif; ?>
-			</select>
+			</select><br />
+			<small><?php _e('Ignored when not grouping by program.', 'gigpress'); ?></small>
 		</p>
 
 		<p>
@@ -259,11 +217,11 @@ function gigpress_sidebar( $filter = null ) {
 	global $wpdb, $gpo;
 	$further_where = '';
 
-	// Variables we need for conditionals
+	// Variables we need for conditionals	
 	$some_results = false;
 
-	// Check total number of artists
-	$total_artists = $wpdb->get_var( "SELECT count(*) from " . GIGPRESS_ARTISTS );
+	// Check total number of programs
+	$total_programs = $wpdb->get_var("SELECT count(*) from " . GIGPRESS_ARTISTS);	
 
 	// Check for sorting
 	if ( isset( $filter['sort'] ) ) {
@@ -296,24 +254,23 @@ function gigpress_sidebar( $filter = null ) {
 				$sort = 'asc';
 			}
 	}
-
-
-	// Number of shows to list (per artist if grouping by artist)	
-	$limit = ( isset( $filter['limit'] ) && is_numeric( $filter['limit'] ) ) ? $wpdb->prepare( '%d', $filter['limit'] ) : 5;
-
+	
+	// Number of shows to list (per program if grouping by program)	
+	$limit = (isset($filter['limit']) && is_numeric($filter['limit'])) ? $wpdb->prepare('%d', $filter['limit']) : 5;
+	
 	// Whether or not to display tour grouings
-	$show_tours = ( isset( $filter['show_tours'] ) && $filter['show_tours'] == 'yes' ) ? 'yes' : false;
-
-	// Whether or not to group artists
-	$group_artists = ( isset( $filter['group_artists'] ) && $filter['group_artists'] == 'yes' ) ? 'yes' : false;
-
-	// Order in which to display artists if grouping
-	$artist_order = ( isset( $filter['artist_order'] ) && $filter['artist_order'] == 'custom' ) ? 'custom' : 'alphabetical';
-
-	// Filtering by artist, tour, venue or related?
-	$artist = isset( $filter['artist'] ) ? $filter['artist'] : false;
-	$tour   = isset( $filter['tour'] ) ? $filter['tour'] : false;
-	$venue  = isset( $filter['venue'] ) ? $filter['venue'] : false;
+	$show_tours = (isset($filter['show_tours']) && $filter['show_tours'] == 'yes') ? 'yes' : FALSE;
+	
+	// Whether or not to group programs
+	$group_artists = (isset($filter['group_artists']) && $filter['group_artists'] == 'yes') ? 'yes' : FALSE;
+	
+	// Order in which to display programs if grouping
+	$artist_order = (isset($filter['artist_order']) && $filter['artist_order'] == 'custom') ? 'custom' : 'alphabetical';
+	
+	// Filtering by program, tour, or venue?
+	$program_id = isset($filter['artist']) ? $filter['artist'] : FALSE;
+	$tour = isset($filter['tour']) ? $filter['tour'] : FALSE;
+	$venue = isset($filter['venue']) ? $filter['venue'] : FALSE;
 	$related = isset( $filter['related'] ) ? $filter['related'] : false;
 
 	// Display feed links and link to more shows?
@@ -321,44 +278,38 @@ function gigpress_sidebar( $filter = null ) {
 	$link       = ( isset( $filter['link_text'] ) && ! empty( $gpo['shows_page'] ) ) ? wptexturize( $filter['link_text'] ) : false;
 
 	// Establish the variable parts of the query
-	if ( $artist ) {
-		$further_where .= ' AND show_artist_id IN(' . $wpdb->prepare( '%s', $artist ) . ')';
-	}
-	if ( $tour ) {
-		$further_where .= ' AND show_tour_id IN(' . $wpdb->prepare( '%s', $tour ) . ')';
-	}
-	if ( $venue ) {
-		$further_where .= ' AND show_venue_id IN(' . $wpdb->prepare( '%s', $venue ) . ')';
-	}
-	if ( $related ) {
-		$further_where .= ' AND show_related IN(' . $wpdb->prepare( '%d', $related ) . ')';
-	}
-	$artist_order = ( $artist_order == 'custom' ) ? "artist_order ASC," : '';
-
+	if($program_id) 
+		$further_where .= ' AND show_artist_id IN(' . $wpdb->prepare('%s', $program_id).')';
+	if($tour) 
+		$further_where .= ' AND show_tour_id IN(' . $wpdb->prepare('%s', $tour).')';
+	if($venue) 
+		$further_where .= ' AND show_venue_id IN(' . $wpdb->prepare('%s', $venue).')';
+	$artist_order = ($artist_order == 'custom') ?  "artist_order ASC," : '';
+		
 	ob_start();
-
-	// If we're grouping by artist, we'll unfortunately have to first get all artists
+	
+	// If we're grouping by program, we'll unfortunately have to first get all programs
 	// Then  make a query for each one. Looking for a better way to do this.
-
-	if ( $group_artists && ! $tour && ! $artist && ! $venue && ! $related && $total_artists > 1 ) {
-
-		$artists = $wpdb->get_results( "SELECT * FROM " . GIGPRESS_ARTISTS . " ORDER BY " . $artist_order . "artist_alpha ASC" );
-
-		foreach ( $artists as $artist_group ) {
-
-			$shows = $wpdb->get_results( "SELECT * FROM " . GIGPRESS_ARTISTS . " AS a, " . GIGPRESS_VENUES . " as v, " . GIGPRESS_SHOWS . " AS s LEFT JOIN  " . GIGPRESS_TOURS . " AS t ON s.show_tour_id = t.tour_id WHERE " . $date_condition . " AND show_status != 'deleted' AND s.show_artist_id = " . $artist_group->artist_id . " AND s.show_artist_id = a.artist_id AND s.show_venue_id = v.venue_id " . $further_where . " ORDER BY s.show_date " . $sort . ",s.show_expire " . $sort . ",s.show_time " . $sort . " LIMIT " . $limit );
-
-			if ( $shows ) {
-				// For each artist group
-
-				$some_results = true;
+	
+	if($group_artists && !$tour && !$program_id && !$venue && $total_programs > 1) { 
+		
+		$programs = $wpdb->get_results("SELECT * FROM " . GIGPRESS_ARTISTS . " ORDER BY " . $artist_order . "artist_alpha ASC");
+		
+		foreach($programs as $program_group) {
+		
+			$shows = $wpdb->get_results("SELECT * FROM " . GIGPRESS_ARTISTS . " AS a, " . GIGPRESS_VENUES . " as v, " . GIGPRESS_SHOWS ." AS s LEFT JOIN  " . GIGPRESS_TOURS . " AS t ON s.show_tour_id = t.tour_id WHERE " . $date_condition . " AND show_status != 'deleted' AND s.show_artist_id = " . $program_group->artist_id . " AND s.show_artist_id = a.artist_id AND s.show_venue_id = v.venue_id " . $further_where . " ORDER BY s.show_date " . $sort . ",s.show_expire " . $sort . ",s.show_time " . $sort . " LIMIT " . $limit);
+			
+			if($shows) {
+				// For each program group
+				
+				$some_results = TRUE;
 				$current_tour = '';
-				$i            = 0;
-
-				// Data for artist heading
+				$i = 0;
+				
+				// Data for program heading
 				$showdata = array(
-					'artist'    => wptexturize( $artist_group->artist_name ),
-					'artist_id' => $artist_group->artist_id,
+					'artist' => wptexturize($program_group->artist_name),
+					'artist_id' => $program_group->artist_id
 				);
 
 				include gigpress_template( 'sidebar-artist-heading' );
@@ -406,22 +357,23 @@ function gigpress_sidebar( $filter = null ) {
 
 			}
 		}
-
-		if ( $some_results ) {
-
-			// After all artist groups
-
+		
+		if($some_results) {
+		
+		// After all program groups
+			
 			// Display the list footer
 			include gigpress_template( 'sidebar-list-footer' );
 
 		} else {
-			// No shows from any artist
-			include gigpress_template( 'sidebar-list-empty' );
-		}
+
+			// No shows from any program
+			include gigpress_template('sidebar-list-empty');
+		}	
 
 	} else {
 
-		// Not grouping by artists
+		// Not grouping by programs
 
 		$shows = $wpdb->get_results( "SELECT * FROM " . GIGPRESS_ARTISTS . " AS a, " . GIGPRESS_VENUES . " as v, " . GIGPRESS_SHOWS . " AS s LEFT JOIN  " . GIGPRESS_TOURS . " AS t ON s.show_tour_id = t.tour_id WHERE " . $date_condition . " AND show_status != 'deleted' AND s.show_artist_id = a.artist_id AND s.show_venue_id = v.venue_id " . $further_where . " ORDER BY s.show_date " . $sort . ",s.show_expire " . $sort . ",s.show_time " . $sort . " LIMIT " . $limit );
 
@@ -474,9 +426,9 @@ function gigpress_sidebar( $filter = null ) {
 			include gigpress_template( 'sidebar-list-footer' );
 
 		} else {
-			// No shows from any artist
-			include gigpress_template( 'sidebar-list-empty' );
-		}
+			// No shows from any program
+			include gigpress_template('sidebar-list-empty');
+		}	
 	}
 
 	echo( '<!-- Generated by GigPress ' . GIGPRESS_VERSION . ' -->
