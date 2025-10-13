@@ -1,6 +1,6 @@
-<?php
 <!-- start prog-list -->
-echo '<hr clear=left style="margin-top:2em;">';
+<?php
+	echo '<hr clear=left style="margin-top:2em;">';
 	echo '<div class="gigpress-artist" id="program-' . $showdata['artist_id']
 		     . '"><h2 class=progtitle><a href="/programs-repertoire/?program_id='
 			 . $showdata['artist_id'] . '" title="open program description">'

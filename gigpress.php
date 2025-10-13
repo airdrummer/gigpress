@@ -90,6 +90,7 @@ require( 'admin/venues.php' );
 require( 'admin/tours.php' );
 require( 'admin/settings.php' );
 require( 'admin/import-export.php' );
+require( 'admin/privacy.php' );
 
 require( 'output/gigpress_shows.php' );
 require('output/gigpress_programs.php');
