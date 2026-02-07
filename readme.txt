@@ -40,6 +40,7 @@ If you want to go beyond GigPress, we also have other plugins that could work gr
 * added Postponed status
 * replace artist_id with program_id
 * replace artist with program
+* add program_notes to artist table
 
 = 2.3.29 [2023-04-27] =
 
