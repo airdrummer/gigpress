@@ -32,7 +32,7 @@ if($yr != $current_year) :
 
 <?php if($showdata['artist_plain'] != $current_program) :
 	 	$current_program = $showdata['artist_plain'];
- ?><hr>
+ ?>
 		<a title='click to show/hide program description'
 						 href="#prog-<?php echo $showdata['id']; ?>"
 						onclick="return showInfo('prog-note-<?php echo $showdata['id']; ?>')" >

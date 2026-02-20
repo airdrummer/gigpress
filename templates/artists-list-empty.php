@@ -9,4 +9,8 @@
 
 ?>
 
-<p class="gigpress-empty"><?php echo $no_results_message; ?></p>
+<h4 class="gigpress-empty">No programs found
+    <?php if(isset($_POST['search']))
+            echo " matching '" . $_POST['search'] . "'";
+    ?>
+</h4>

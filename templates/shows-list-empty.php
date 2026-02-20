@@ -54,3 +54,4 @@
 		 echo $no_results_message;
 ?>
 </p>
+<hr>

@@ -3,19 +3,10 @@
 ?>
 <!--gigpress prog-list-end start -->
 <?php
-	if( $program_id )
+	if( $program_id or (isset($_POST['search'])))
 	{
 		echo "<style type='text/css'>.hero-image { display: none; } </style>";
-	 	echo "<p><a class=floatright href='/programs-repertoire/'>view all programs</a></p>";
-	}
-	else
-	{
-		echo "<p><a class=floatright href='/programs-repertoire/?artist_order=";
-		if ( $artist_order == 'alpha')
-			echo "custom'>list in preferred order";
-		else
-			echo "alpha'>list in alphabetical order";
-		echo "</a></p>";
+	 	echo "<h4><a class=floatright href='/programs-repertoire/'>view all programs</a></h4>";
 	}
 ?>
 

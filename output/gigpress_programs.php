@@ -18,22 +18,74 @@ function gigpress_programs($filter = null, $content = null)
 		$program_id = $artist;
 
 	// Query vars take precedence over function vars
-	if(isset($_REQUEST['artist_id']))
-		$program_id = $_REQUEST['artist_id'];
-	if(isset($_REQUEST['program_id']))
-		$program_id = $_REQUEST['program_id'];
-	if(isset($_REQUEST['exclude']))
-		$exclude = $_REQUEST['exclude'];
-	if(isset($_REQUEST['artist_order']))
-		$artist_order = $_REQUEST['artist_order'];
+	if(isset($_GET['artist_id']))
+		$program_id = $_GET['artist_id'];
+	if(isset($_GET['program_id']))
+		$program_id = $_GET['program_id'];
+	if(isset($_GET['exclude']))
+		$exclude = $_GET['exclude'];
+	if(isset($_GET['artist_order']))
+		$artist_order = $_GET['artist_order'];
 
 	ob_start();
 	
+	include gigpress_template('artists-search-form');
+	
 	if( $program_id )
 		$and_where = ' where artist_id = ' . $wpdb->prepare('%d', $program_id);
+
+	else if ( ! empty($_POST['gp_artist_search_submit']) AND
+         	  ! empty($_POST['search']) AND
+         	  ! empty($_POST['gp_artist_search_nonce']) AND
+         	  ! wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action'))
+ 	{
+ 		$search_string = sanitize_text_field( wp_unslash($_POST['search']) );
+
+	    $logic = (isset($_POST['logic']) 
+	    			&& strtoupper($_POST['logic']) === 'OR')
+			        ? 'OR'
+			        : 'AND';
+
+    	$search_note = !empty($_POST['search_note']);
+    	
+	    $terms = preg_split('/\s+/', trim($search_string));
+	    $terms = array_filter($terms);
+	
+	    if ( ! empty($terms) ) 
+	    {
+		    $where_parts = array();
+		    $params      = array();
+		
+		    foreach ( $terms as $term ) 
+		    {
+		        $like = '%' . $wpdb->esc_like( $term ) . '%';
+		        $where_parts[] = "(artist_name LIKE %s"
+		        				 . ($search_note
+		        				 	?	" OR program_note LIKE %s"
+		        				 	:	"")
+		        				 . ")";
+		        $params[] = $like;
+		        $params[] = $like;
+		
+		        if ( $search_note ) 
+		            $params[] = $like;
+		    }
+		    $and_where = $wpdb->prepare( implode(" $logic ", $where_parts), 
+		    							  $params );
+	    }
+		else
+		{
+			$and_where = '';
+			unset($_POST['search']);
+			echo $content;
+		}
+ 	}
 	else
+	{
+		$and_where = '';
 		echo $content;
-			
+	}
+	
 	$programs = $wpdb->get_results("SELECT * FROM " . GIGPRESS_ARTISTS
 	 			. $and_where
 				 . " ORDER BY "

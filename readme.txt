@@ -3,7 +3,7 @@ Contributors: theeventscalendar, brianjessee, camwynsp, aguseo, bordoni, borkweb
 Tags: concerts, bands, tours, shows, record labels, music, musicians, performers, artists
 Requires at least: 4.5
 Tested up to: 6.1.1
-Stable tag: 2.3.29.1
+Stable tag: 2.3.29.2
 
 GigPress is a live performance listing and management plugin that's been serving musicians and performers since 2007.
 
@@ -36,7 +36,10 @@ If you want to go beyond GigPress, we also have other plugins that could work gr
 
 == Changelog ==
 
-= 2.3.29.1	22-08-13] @airdrummer
+= 2.3.29.2	[26-02-20] @airdrummer
+* added gigpress artist search
+
+= 2.3.29.1	[22-08-13] @airdrummer
 * added Postponed status
 * replace artist_id with program_id
 * replace artist with program
