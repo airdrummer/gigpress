@@ -1,8 +1,7 @@
 <?php
 //	bostoncamerata.org
-?>
-<!--gigpress prog-list-end start -->
-<?php
+//--gigpress prog-list-end start
+
 	if( $program_id or (isset($_POST['search'])))
 	{
 		echo "<style type='text/css'>.hero-image { display: none; } </style>";

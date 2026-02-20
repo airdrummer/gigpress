@@ -30,14 +30,14 @@ function gigpress_programs($filter = null, $content = null)
 	ob_start();
 	
 	include gigpress_template('artists-search-form');
-	
+
 	if( $program_id )
 		$and_where = ' where artist_id = ' . $wpdb->prepare('%d', $program_id);
 
-	else if ( ! empty($_POST['gp_artist_search_submit']) AND
-         	  ! empty($_POST['search']) AND
-         	  ! empty($_POST['gp_artist_search_nonce']) AND
-         	  ! wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action'))
+	else if ( $_SERVER['REQUEST_METHOD'] === 'POST' &&
+              ! empty($_POST['search']) &&
+              ! empty($_POST['gp_artist_search_nonce']) &&
+                wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action'))
  	{
  		$search_string = sanitize_text_field( wp_unslash($_POST['search']) );
 
@@ -61,17 +61,14 @@ function gigpress_programs($filter = null, $content = null)
 		        $like = '%' . $wpdb->esc_like( $term ) . '%';
 		        $where_parts[] = "(artist_name LIKE %s"
 		        				 . ($search_note
-		        				 	?	" OR program_note LIKE %s"
-		        				 	:	"")
-		        				 . ")";
+		        				 	?	" OR program_notes LIKE %s)"
+		        				 	:	")");
 		        $params[] = $like;
-		        $params[] = $like;
-		
 		        if ( $search_note ) 
 		            $params[] = $like;
 		    }
-		    $and_where = $wpdb->prepare( implode(" $logic ", $where_parts), 
-		    							  $params );
+		    $and_where = implode(" $logic ", $where_parts);
+		    $and_where = " where " . $wpdb->prepare( $and_where, ...$params );
 	    }
 		else
 		{
@@ -92,16 +89,18 @@ function gigpress_programs($filter = null, $content = null)
 				  . (($artist_order == 'custom') 
 					 ? "artist_order ASC" 
 					 : "artist_alpha ASC"));
-	if ($exclude)
-		$exclude = explode(",",$exclude);
-	else 
-		$exclude = array();
 		
 	if ( count($programs) == 0 )
 			include gigpress_template('artists-list-empty');
 	else
 	{
+     	if ($exclude)
+    		$exclude = explode(",",$exclude);
+    	else 
+    		$exclude = array();
+
 		include gigpress_template('artists-list-start');
+		
 		foreach($programs as $program) 
 		{
 			if (in_array($program->artist_id, $exclude))

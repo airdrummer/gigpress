@@ -1,4 +1,3 @@
-<!-- start prog-list -->
 <?php
 	echo '<hr clear=left style="margin-top:2em;">';
 	echo '<div class="gigpress-artist" id="program-' . $showdata['artist_id']
