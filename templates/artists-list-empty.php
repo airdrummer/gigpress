@@ -11,6 +11,6 @@
 
 <h4 class="gigpress-empty">No programs found
     <?php if(isset($_POST['search']))
-            echo " matching '" . $_POST['search'] . "'";
+            echo " matching '" . implode(" $logic ", $terms) . "'";
     ?>
 </h4>

@@ -1,4 +1,5 @@
-<details id="filter-form" open="">
+<div class="filter-form gamma gig-pup">
+<details id="filter-form" >
     <summary style="padding-top: 2px;" title="-- match titles/text ">search</summary>
 
  	<form method="post" class="gp-artist-search-form">
@@ -10,26 +11,36 @@
 	           placeholder="Search programs">
 	
 	    <select name="logic">
-	        <option value="AND" <?php selected($_POST['logic'] ?? '', 'AND'); ?>>
-	            Match ALL words
-	        </option>
 	        <option value="OR" <?php selected($_POST['logic'] ?? '', 'OR'); ?>>
 	            Match ANY word
 	        </option>
+	        <option value="AND" <?php selected($_POST['logic'] ?? '', 'AND'); ?>>
+	            Match ALL words
+	        </option>
 	    </select>
-	
+	<br>
 	    <label>
 	        <input type="checkbox"
 	               name="search_note"
 	               value="1"
 	               <?php checked($_POST['search_note'] ?? '', '1'); ?>>
-	        Include program notes in search
+	        Include&nbsp;program&nbsp;notes in&nbsp;search
 	    </label>
 	
-	    <button type="submit" name="gp_artist_search_submit">
-	        Search
-	    </button>
+	    <button type="submit" name="gp_artist_search_submit">Search</button>
 	    <br>
 	    <a href="<?php echo esc_url( get_permalink() ); ?>" class="clear-button">Clear all</a>
   </form>
 </details>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() 
+    {
+        const ff  = document.querySelector('.filter-form');
+        const hdr = document.querySelector('#masthead');
+        if (ff && hdr) 
+            hdr.appendChild(ff);
+        else
+            console.warn("filter-form not found");
+    });
+</script>

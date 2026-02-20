@@ -30,14 +30,19 @@ function gigpress_programs($filter = null, $content = null)
 	ob_start();
 	
 	include gigpress_template('artists-search-form');
-	
-	if( $program_id )
-		$and_where = ' where artist_id = ' . $wpdb->prepare('%d', $program_id);
 
-	else if ( ! empty($_POST['gp_artist_search_submit']) AND
-         	  ! empty($_POST['search']) AND
-         	  ! empty($_POST['gp_artist_search_nonce']) AND
-         	  ! wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action'))
+	$query = "SELECT * FROM " . GIGPRESS_ARTISTS;
+	$params = array();
+
+	if( $program_id )
+	{
+		$query .= ' where artist_id = %d' ;
+		$params[] = $program_id;
+	}
+	else if ( $_SERVER['REQUEST_METHOD'] === 'POST' &&
+              ! empty($_POST['search']) &&
+              ! empty($_POST['gp_artist_search_nonce']) &&
+                wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action'))
  	{
  		$search_string = sanitize_text_field( wp_unslash($_POST['search']) );
 
@@ -54,54 +59,47 @@ function gigpress_programs($filter = null, $content = null)
 	    if ( ! empty($terms) ) 
 	    {
 		    $where_parts = array();
-		    $params      = array();
 		
 		    foreach ( $terms as $term ) 
 		    {
 		        $like = '%' . $wpdb->esc_like( $term ) . '%';
 		        $where_parts[] = "(artist_name LIKE %s"
 		        				 . ($search_note
-		        				 	?	" OR program_note LIKE %s"
-		        				 	:	"")
-		        				 . ")";
+		        				 	?	" OR program_notes LIKE %s)"
+		        				 	:	")");
 		        $params[] = $like;
-		        $params[] = $like;
-		
 		        if ( $search_note ) 
 		            $params[] = $like;
 		    }
-		    $and_where = $wpdb->prepare( implode(" $logic ", $where_parts), 
-		    							  $params );
+		    $query .= " where " . implode(" $logic ", $where_parts);
 	    }
 		else
 		{
-			$and_where = '';
 			unset($_POST['search']);
 			echo $content;
 		}
  	}
 	else
-	{
-		$and_where = '';
 		echo $content;
-	}
 	
-	$programs = $wpdb->get_results("SELECT * FROM " . GIGPRESS_ARTISTS
-	 			. $and_where
-				 . " ORDER BY "
-				  . (($artist_order == 'custom') 
+	$query .= " ORDER BY "
+				  . ($artist_order == 'custom'
 					 ? "artist_order ASC" 
-					 : "artist_alpha ASC"));
-	if ($exclude)
-		$exclude = explode(",",$exclude);
-	else 
-		$exclude = array();
-		
+					 : "artist_alpha ASC");
+	$query    = $wpdb->prepare( $query, ...$params );
+	$programs = $wpdb->get_results($query);
+
 	if ( count($programs) == 0 )
-			include gigpress_template('artists-list-empty');
+		include gigpress_template('artists-list-empty');
 	else
 	{
+     	if ($exclude)
+    		$exclude = explode(",",$exclude);
+    	else 
+    		$exclude = array();
+
 		include gigpress_template('artists-list-start');
+		
 		foreach($programs as $program) 
 		{
 			if (in_array($program->artist_id, $exclude))
