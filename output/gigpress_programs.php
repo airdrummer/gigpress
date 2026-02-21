@@ -51,23 +51,23 @@ function gigpress_programs($filter = null, $content = null)
 			        : 'AND';
     	$search_note = !empty($_POST['search_note']);
     	
-// 1. Strip any slashes added by WordPress/PHP magic quotes
-    $search_string = wp_unslash($search_string);
-
-    // 2. Extract phrases in quotes OR individual words
-    // PREG_SET_ORDER keeps the match groups tied to the specific hit
-    preg_match_all('/"([^"]+)"|(\S+)/', $search_string, $matches, PREG_SET_ORDER);
+        // 1. Strip any slashes added by WordPress/PHP magic quotes
+        $search_string = wp_unslash($search_string);
     
-    $terms = [];
-    foreach ($matches as $match) {
-        // Index 1 is the inner content of " "
-        // Index 2 is the standalone word
-        $term = !empty($match[1]) ? $match[1] : $match[2];
-        if ($term) {
-            $terms[] = $term;
+        // 2. Extract phrases in quotes OR individual words
+        // PREG_SET_ORDER keeps the match groups tied to the specific hit
+        preg_match_all('/"([^"]+)"|(\S+)/', $search_string, $matches, PREG_SET_ORDER);
+        
+        $terms = [];
+        foreach ($matches as $match) {
+            // Index 1 is the inner content of " "
+            // Index 2 is the standalone word
+            $term = !empty($match[1]) ? $match[1] : $match[2];
+            if ($term) {
+                $terms[] = $term;
+            }
         }
-    }
-    
+        
 	    if ( ! empty($terms) ) 
 	    {
 		    $where_parts = array();
@@ -86,13 +86,13 @@ function gigpress_programs($filter = null, $content = null)
 		    $query .= " where " . implode(" $logic ", $where_parts);
 	    }
 		else
-		{
 			unset($_POST['search']);
-		}
  	}
 	else
+	{
+		unset($_POST['search']);
 		echo $content;
-	
+	}
 	$query .= " ORDER BY "
 				  . ($artist_order == 'custom'
 					 ? "artist_order ASC" 
