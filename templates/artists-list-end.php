@@ -2,7 +2,7 @@
 //	bostoncamerata.org
 //--gigpress prog-list-end start
 
-	if( $program_id or (isset($_POST['search'])))
+	if( $program_id or (!empty($_POST['search'])))
 	{
 		echo "<style type='text/css'>.hero-image { display: none; } </style>";
 	 	echo "<h4><a class=floatright href='/programs-repertoire/'>view all programs</a></h4>";

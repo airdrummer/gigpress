@@ -59,15 +59,15 @@ function gigpress_programs($filter = null, $content = null)
         preg_match_all('/"([^"]+)"|(\S+)/', $search_string, $matches, PREG_SET_ORDER);
         
         $terms = [];
-        foreach ($matches as $match) {
+        foreach ($matches as $match) 
+        {
             // Index 1 is the inner content of " "
             // Index 2 is the standalone word
             $term = !empty($match[1]) ? $match[1] : $match[2];
-            if ($term) {
+            if ($term)
                 $terms[] = $term;
-            }
         }
-        
+
 	    if ( ! empty($terms) ) 
 	    {
 		    $where_parts = array();
@@ -85,16 +85,12 @@ function gigpress_programs($filter = null, $content = null)
 		    }
 		    $query .= " where " . implode(" $logic ", $where_parts);
 	    }
-		else
-			unset($_POST['search']);
  	}
 	else
-	{
-		unset($_POST['search']);
 		echo $content;
-	}
-	$query .= " ORDER BY "
-				  . ($artist_order == 'custom'
+
+	$query .= " ORDER BY %s"; // make prepare happy
+	$params[] = ($artist_order == 'custom'
 					 ? "artist_order ASC" 
 					 : "artist_alpha ASC");
 	$query    = $wpdb->prepare( $query, ...$params );
