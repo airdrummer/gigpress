@@ -8,7 +8,7 @@
 	    <input type="text"
 	           name="search"
 	           value="<?php echo wp_unslash(esc_attr($_POST['search'] ?? '')); ?>"
-	           placeholder="Search programs">
+	           placeholder='enclose "phrases in quotes"'>
 	
 	    <select name="logic">
 	        <option value="OR" <?php selected($_POST['logic'] ?? '', 'OR'); ?>>
