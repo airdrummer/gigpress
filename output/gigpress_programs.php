@@ -16,6 +16,10 @@ function gigpress_programs($filter = null, $content = null)
 
 	if($artist)
 		$program_id = $artist;
+    if ($exclude)
+    	$exclude = explode(",",$exclude);
+    else 
+    	$exclude = array();
 
 	// Query vars take precedence over function vars
 	if(isset($_GET['artist_id']))
@@ -44,16 +48,14 @@ function gigpress_programs($filter = null, $content = null)
               ! empty($_POST['gp_artist_search_nonce']) &&
                 wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action'))
  	{
- 		$search_string = sanitize_text_field( wp_unslash($_POST['search']) );
 	    $logic = (isset($_POST['logic']) 
 	    			&& strtoupper($_POST['logic']) === 'OR')
 			        ? 'OR'
 			        : 'AND';
     	$search_note = !empty($_POST['search_note']);
     	
+ 		$search_string = sanitize_text_field( wp_unslash($_POST['search']) );
         // 1. Strip any slashes added by WordPress/PHP magic quotes
-        $search_string = wp_unslash($search_string);
-    
         // 2. Extract phrases in quotes OR individual words
         // PREG_SET_ORDER keeps the match groups tied to the specific hit
         preg_match_all('/"([^"]+)"|(\S+)/', $search_string, $matches, PREG_SET_ORDER);
@@ -84,13 +86,13 @@ function gigpress_programs($filter = null, $content = null)
 		            $params[] = $like;
 		    }
 		    $query .= " where " . implode(" $logic ", $where_parts);
+    	    $exclude = array();
 	    }
  	}
 	else
 		echo $content;
 
-	$query .= " ORDER BY %s"; // make prepare happy
-	$params[] = ($artist_order == 'custom'
+	$query .= " ORDER BY " . ($artist_order == 'custom'
 					 ? "artist_order ASC" 
 					 : "artist_alpha ASC");
 	$query    = $wpdb->prepare( $query, ...$params );
@@ -100,11 +102,6 @@ function gigpress_programs($filter = null, $content = null)
 		include gigpress_template('artists-list-empty');
 	else
 	{
-     	if ($exclude)
-    		$exclude = explode(",",$exclude);
-    	else 
-    		$exclude = array();
-
 		include gigpress_template('artists-list-start');
 		
 		foreach($programs as $program) 
