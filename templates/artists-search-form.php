@@ -7,7 +7,7 @@
 	
 	    <input type="text"
 	           name="search"
-	           value="<?php echo esc_attr($_POST['search'] ?? ''); ?>"
+	           value="<?php echo wp_unslash(esc_attr($_POST['search'] ?? '')); ?>"
 	           placeholder="Search programs">
 	
 	    <select name="logic">
@@ -26,7 +26,7 @@
 	               <?php checked($_POST['search_note'] ?? '', '1'); ?>>
 	        Include&nbsp;program&nbsp;notes in&nbsp;search
 	    </label>
-	
+	<br>
 	    <button type="submit" name="gp_artist_search_submit">Search</button>
 	    <br>
 	    <a href="<?php echo esc_url( get_permalink() ); ?>" class="clear-button">Clear all</a>

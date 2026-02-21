@@ -10,7 +10,12 @@
 ?>
 
 <h4 class="gigpress-empty">No programs found
-    <?php if(isset($_POST['search']))
-            echo " matching '" . implode(" $logic ", $terms) . "'";
+    <?php 
+    	if(isset($_POST['search']))
+    	{
+            echo " matching '" . implode("' $logic '", $terms) . "'";
+            echo "<style type='text/css'>.hero-image { display: none; } </style>";
+	 	    echo "<br><a class=floatright href='/programs-repertoire/'>view all programs</a>";
+    	}
     ?>
 </h4>

@@ -45,24 +45,36 @@ function gigpress_programs($filter = null, $content = null)
                 wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action'))
  	{
  		$search_string = sanitize_text_field( wp_unslash($_POST['search']) );
-
 	    $logic = (isset($_POST['logic']) 
 	    			&& strtoupper($_POST['logic']) === 'OR')
 			        ? 'OR'
 			        : 'AND';
-
     	$search_note = !empty($_POST['search_note']);
     	
-	    $terms = preg_split('/\s+/', trim($search_string));
-	    $terms = array_filter($terms);
-	
+// 1. Strip any slashes added by WordPress/PHP magic quotes
+    $search_string = wp_unslash($search_string);
+
+    // 2. Extract phrases in quotes OR individual words
+    // PREG_SET_ORDER keeps the match groups tied to the specific hit
+    preg_match_all('/"([^"]+)"|(\S+)/', $search_string, $matches, PREG_SET_ORDER);
+    
+    $terms = [];
+    foreach ($matches as $match) {
+        // Index 1 is the inner content of " "
+        // Index 2 is the standalone word
+        $term = !empty($match[1]) ? $match[1] : $match[2];
+        if ($term) {
+            $terms[] = $term;
+        }
+    }
+    
 	    if ( ! empty($terms) ) 
 	    {
 		    $where_parts = array();
 		
 		    foreach ( $terms as $term ) 
 		    {
-		        $like = '%' . $wpdb->esc_like( $term ) . '%';
+		        $like = '%' . $wpdb->esc_like( str_replace('"','',$term )) . '%';
 		        $where_parts[] = "(artist_name LIKE %s"
 		        				 . ($search_note
 		        				 	?	" OR program_notes LIKE %s)"
@@ -76,7 +88,6 @@ function gigpress_programs($filter = null, $content = null)
 		else
 		{
 			unset($_POST['search']);
-			echo $content;
 		}
  	}
 	else

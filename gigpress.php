@@ -3,7 +3,7 @@
  * Plugin Name: GigPress
  * Plugin URI:  https://evnt.is/1aca
  * Description: GigPress is a live performance listing and management plugin built for musicians and performers.
- * Version:     2.3.29.2
+ * Version:     2.3.29.3
  * Author:      The Events Calendar
  * Author URI:  https://evnt.is/1aor
  * Text Domain: gigpress
@@ -42,7 +42,7 @@ if ( ! defined( 'GIGPRESS_VENUES' ) )
 	define( 'GIGPRESS_VENUES', $wpdb->prefix . 'gigpress_venues' );
 
 if ( ! defined( 'GIGPRESS_VERSION' ) )
-	define( 'GIGPRESS_VERSION', '2.3.29.2' );
+	define( 'GIGPRESS_VERSION', '2.3.29.3' );
 
 if ( ! defined( 'GIGPRESS_DB_VERSION' ) )
 	define( 'GIGPRESS_DB_VERSION', '1.7' );
