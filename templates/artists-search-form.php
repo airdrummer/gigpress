@@ -43,3 +43,9 @@
             console.warn("filter-form not found");
     });
 </script>
+<style>
+    .site-header .search-form 
+    {
+        display: none;
+    }
+</style>
