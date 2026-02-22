@@ -5,8 +5,7 @@
  	<form method="post" class="gp-artist-search-form">
 	    <?php wp_nonce_field('gp_artist_search_action', 'gp_artist_search_nonce'); ?>
 	
-	    <input type="text"
-	           name="search"
+	    <input type="text" name="search" width=90%
 	           value="<?php echo wp_unslash(esc_attr($_POST['search'] ?? '')); ?>"
 	           placeholder='enclose "phrases in quotes"'>
 	
