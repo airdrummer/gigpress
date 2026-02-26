@@ -7,7 +7,7 @@
 	
 	    <input type="text" name="search" style="width:90%;"
 	           value="<?php echo wp_unslash(esc_attr($_POST['search'] ?? '')); ?>"
-	           placeholder='enclose "phrases in quotes"'>
+	           placeholder=' enclose "phrases in quotes"'>
 	
 	    <select name="logic">
 	        <option value="OR" <?php selected($_POST['logic'] ?? '', 'OR'); ?>>
@@ -26,7 +26,9 @@
 	        Include&nbsp;program&nbsp;notes in&nbsp;search
 	    </label>
 	<br>
-	    <button type="submit" name="gp_artist_search_submit">Search</button>
+	    <?php $selected_names = bc_display_taxonomy_checkboxes("genre",$selected_genres);?>
+	    
+	    <button type="submit" name="gp_artist_search_submit">apply</button>
 	    <br>
 	    <a href="<?php echo esc_url( get_permalink() ); ?>" class="clear-button">Clear all</a>
   </form>

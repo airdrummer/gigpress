@@ -6,12 +6,12 @@ function gigpress_artists() {
 
 	if(isset($_POST['gpaction']) && $_POST['gpaction'] == "add") {
 		require_once('handlers.php');
-		$result = gigpress_add_artist();
+		$result = gigpress_add_artist($program_genres);
 	}
 
 	if(isset($_POST['gpaction']) && $_POST['gpaction'] == "update") {
 		require_once('handlers.php');
-		$result = gigpress_update_artist();
+		$result = gigpress_update_artist($artist_id, $program_genres);
 	}
 
 	if(isset($_GET['gpaction']) && $_GET['gpaction'] == "delete") {
@@ -24,53 +24,64 @@ function gigpress_artists() {
 		gigpress_map_tours_to_artists();
 	}
 
-	$url_args = (isset($_GET['gp-page'])) ? '&amp;gp-page=' . sanitize_text_field($_GET['gp-page']) : '';
-
+	$url_args = (isset($_GET['gp-page'])) 
+					? '&amp;gp-page=' . sanitize_text_field($_GET['gp-page']) 
+					: '';
 	?>
 
 	<div class="wrap gigpress gp-artists">
 
 	<h1><?php _e("programs", "gigpress"); ?></h1>	
 	
-	<?php
-	if(isset($_GET['gpaction']) && $_GET['gpaction'] == "edit" || isset($result) && isset($result['editing']) ) {
+<?php
 
+	$program_genres = array();
+	
+	if(isset($_GET['gpaction']) && $_GET['gpaction'] == "edit"
+	  || isset($result) && isset($result['editing']) ) 
+	{
 		$artist_id = (isset($_REQUEST['artist_id'])) ? $wpdb->prepare('%d', $_REQUEST['artist_id']) : '';
 	
 		$artist = $wpdb->get_row("SELECT artist_name, artist_url, program_notes FROM ". GIGPRESS_ARTISTS ." WHERE artist_id = ". $artist_id);
-		if($artist) {
-			
+		if($artist) 
+		{
+		    // Get existing genres for this program  
+		    require_once('../../bostonCamerata/bostonCamerata.php');
+		    $program_genres = gigpress_get_program_genres($artist_id);
+
 			$submit = '<span class="submit"><input type="submit" name="Submit" class="button-primary" value="' .  __("Update program", "gigpress") . '" /></span> ' . __("or", "gigpress") . ' <a href="' . admin_url('admin.php?page=gigpress-artists' . $url_args) . '">' . __("cancel", "gigpress") . '</a>'; ?>
 
 			<h3><?php _e("Edit this program", "gigpress"); ?></h3>
 
 			<form method="post" action="<?php echo admin_url("admin.php?page=gigpress-artists" . $url_args); ?>">
-			<input type="hidden" name="gpaction" value="update" />
-			<input type="hidden" name="artist_id" value="<?php echo $artist_id; ?>" />
-
-		<?php
-		} else {
-		?>		
+				<input type="hidden" name="gpaction" value="update" />
+				<input type="hidden" name="artist_id" value="<?php echo $artist_id; ?>" />
+<?php
+		} 
+		else 
+		{ 
+?>
 			<div id="message" class="error fade"><p><?php _e("Sorry, but we had trouble loading that program for editing.", "gigpress"); ?></p></div>	
 			
 			<h3><?php _e("Add a program", "gigpress"); ?></h3>
-		
-		<?php
+<?php
 		}
-
-	} else {
-
+	} 
+	else 
+	{
 		$artist = array();
-		$submit = '<span class="submit"><input type="submit" name="Submit" class="button-primary" value="' .  __("Add program", "gigpress") . '" /></span>'; ?>
+		$submit = '<span class="submit"><input type="submit" name="Submit" class="button-primary" value="' .  __("Add program", "gigpress") . '" /></span>'; 
+?>
 
 		<h2><?php _e("Add a program", "gigpress"); ?></h2>
 		
 		<form method="post" action="<?php echo admin_url('admin.php?page=gigpress-artists' . $url_args); ?>">
 		<input type="hidden" name="gpaction" value="add" />
 
-	<?php
+<?php
 	}
-		wp_nonce_field('gigpress-action') ?>
+		wp_nonce_field('gigpress-action') 
+?>
 
 		<table class="form-table gp-table">
 			<tr>
@@ -98,14 +109,24 @@ function gigpress_artists() {
 				</td>
 			</tr>
 			<tr>
+				<th scope="row"><label for="program_genres"><?php _e("program genres", "gigpress"); ?>:</label></th>
+				<td>
+<?php				bc_display_taxonomy_checkboxes( 
+										'genre',
+										wp_list_pluck(
+												$program_genres,
+												"genre_slug" )); 
+?>
+				</td>
+			</tr>
+			<tr>
 				<td>&nbsp;</td>
 				<td>
 					<?php echo $submit; ?>
 				</td>
 			</tr>
-		</table>
-
-		</form>
+		 </table>
+	   </form>
 
 	<h2><?php _e("All programs", "gigpress"); ?></h2>
 	

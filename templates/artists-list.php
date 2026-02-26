@@ -8,14 +8,21 @@
 
 		if(!empty($showdata['program_notes'])) : ?>
 			<div class="prog-note" id="prognote-<?php echo $showdata['artist_id']; ?>"> <!-- start prog-note -->
-			<?php echo $showdata['program_notes']; ?>
-			<?php if(!empty($gpo['artist_link'])
-		  && !empty($showdata['artist_url'])
-		  && (strpos($showdata['artist_url'],"#program-" . $showdata['artist_id']) === false))
-          {
-			echo '&nbsp;&nbsp;&nbsp;<a class="more-info" href="' . esc_url($showdata['artist_url']) . '"'
-				 . gigpress_target($showdata['artist_url']) . '>read more...</a>';
-				} ?>
+			<?php 
+				echo $showdata['program_notes'];
+
+				if(!empty($showdata['genres']))
+					echo "<div class=prog-genres>Genres: "
+							. implode(', ', $showdata['genres'])
+						. "</div>"; 
+				
+				if(!empty($gpo['artist_link'])
+				  && !empty($showdata['artist_url'])
+				  && (strpos($showdata['artist_url'],"#program-" . $showdata['artist_id']) === false))
+		          {
+					echo '&nbsp;&nbsp;&nbsp;<a class="more-info" href="' . esc_url($showdata['artist_url']) . '"'
+						 . gigpress_target($showdata['artist_url']) . '>read more...</a>';
+						} ?>
 			</div>
 	<?php endif;
 	

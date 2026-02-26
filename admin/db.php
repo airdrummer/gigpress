@@ -187,6 +187,8 @@ if ( $gpo['db_version'] < GIGPRESS_DB_VERSION ) {
 			gigpress_db_upgrade_160();
 		case "1.6":
 			gigpress_db_upgrade_170();
+		case "1.7":
+			gigpress_db_upgrade_180();
 			break;
 		default:
 			 error_log("===invalid gigpress.db_version: " . $gpo['db_version']);
@@ -334,6 +336,27 @@ function gigpress_db_upgrade_170() {
 	$artists = $wpdb->get_results(
 		"ALTER TABLE " . GIGPRESS_ARTISTS . " ADD program_notes TEXT"
 	);
+}
+
+function gigpress_db_upgrade_180() 
+{
+	global $wpdb;
+	
+	// Add artist->genre table
+    $table_name = $wpdb->prefix . 'gigpress_program_genres';
+    $charset_collate = $wpdb->get_charset_collate();
+
+    $sql = "CREATE TABLE $table_name (
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        program_id BIGINT UNSIGNED NOT NULL,
+        genre_slug VARCHAR(15) NOT NULL,
+        genre_name VARCHAR(25) NOT NULL,
+        PRIMARY KEY (id),
+        KEY program_id (program_id),
+        KEY genre_slug (genre_slug),
+        UNIQUE KEY artist_genre (program_id, genre_slug)
+    	) $charset_collate;";
+	$artist_genres = $wpdb->get_results($sql);
 }
 
 function gigpress_uninstall() {
