@@ -46,7 +46,8 @@ function gigpress_prepare_show_fields($context = 'new') {
 			'artist_url'    => gigpress_db_in($_POST['artist_url'], FALSE),
 			'program_notes' => gigpress_db_in($_POST['program_notes'], FALSE)
 		);
-		$insert_artist = $wpdb->insert(GIGPRESS_ARTISTS, $artist);
+		$format = array('%s', '%s', '%s', '%s');
+		$insert_artist = $wpdb->insert(GIGPRESS_ARTISTS, $artist, $format);
 
 		if($insert_artist) {
 			$show['show_artist_id'] = $wpdb->insert_id;
@@ -901,7 +902,8 @@ function gigpress_import() {
 						'artist_url' => gigpress_db_in(@$show['Program URL'], FALSE),
 						'program_notes' => gigpress_db_in(@$show['Program Notes'], FALSE)
 					);
-					$wpdb->insert(GIGPRESS_ARTISTS, $new_artist, '%s');
+		            $format = array('%s', '%s', '%s', '%s');
+					$wpdb->insert(GIGPRESS_ARTISTS, $new_artist, $format);
 					$show['artist_id'] = $wpdb->insert_id;
 				} else {
 					$show['artist_id'] = $artist_exists;
