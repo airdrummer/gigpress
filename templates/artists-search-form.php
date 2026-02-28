@@ -26,8 +26,11 @@
 	        Include&nbsp;program&nbsp;notes in&nbsp;search
 	    </label>
 	<br>
-	    <?php $selected_names = bc_display_taxonomy_checkboxes("genre",$selected_genres);?>
-	    
+<?php	$selected_genres = $_POST['genre'];
+print_r($selected_genres);
+		$selected_names = bc_display_taxonomy_checkboxes("genre",$selected_genres);
+print_r($selected_names);
+?> 
 	    <button type="submit" name="gp_artist_search_submit">apply</button>
 	    <br>
 	    <a href="<?php echo esc_url( get_permalink() ); ?>" class="clear-button">Clear all</a>

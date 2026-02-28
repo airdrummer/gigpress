@@ -1,17 +1,19 @@
 <?php
 
+require_once WP_PLUGIN_DIR . '/bostonCamerata/includes/bc_recording_utils.php';
+
 function gigpress_artists() {
 
 	global $wpdb;
 
 	if(isset($_POST['gpaction']) && $_POST['gpaction'] == "add") {
 		require_once('handlers.php');
-		$result = gigpress_add_artist($program_genres);
+		$result = gigpress_add_artist();
 	}
 
 	if(isset($_POST['gpaction']) && $_POST['gpaction'] == "update") {
 		require_once('handlers.php');
-		$result = gigpress_update_artist($artist_id, $program_genres);
+		$result = gigpress_update_artist($artist_id);
 	}
 
 	if(isset($_GET['gpaction']) && $_GET['gpaction'] == "delete") {
@@ -46,7 +48,6 @@ function gigpress_artists() {
 		if($artist) 
 		{
 		    // Get existing genres for this program  
-		    require_once('../../bostonCamerata/bostonCamerata.php');
 		    $program_genres = gigpress_get_program_genres($artist_id);
 
 			$submit = '<span class="submit"><input type="submit" name="Submit" class="button-primary" value="' .  __("Update program", "gigpress") . '" /></span> ' . __("or", "gigpress") . ' <a href="' . admin_url('admin.php?page=gigpress-artists' . $url_args) . '">' . __("cancel", "gigpress") . '</a>'; ?>
@@ -115,7 +116,7 @@ function gigpress_artists() {
 										'genre',
 										wp_list_pluck(
 												$program_genres,
-												"genre_slug" )); 
+												"genre_slug" ), false); 
 ?>
 				</td>
 			</tr>

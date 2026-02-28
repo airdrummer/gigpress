@@ -36,7 +36,7 @@ If you want to go beyond GigPress, we also have other plugins that could work gr
 
 == Changelog ==
 
-= 2.3.29.4	[26-02-26] @airdrummer
+= 2.3.29.4	[26-02-28] @airdrummer
 * add program genres
 
 = 2.3.29.3	[26-02-21] @airdrummer

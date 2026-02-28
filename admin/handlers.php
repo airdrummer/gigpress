@@ -617,7 +617,9 @@ function gigpress_delete_tour() {
 	<?php }
 }
 
-// Get existing genres for program  
+
+// Get existing genres for program 
+//
 function gigpress_get_program_genres($program_id)
 {
 	global $wpdb;
@@ -626,14 +628,16 @@ function gigpress_get_program_genres($program_id)
 		        				$wpdb->prepare( $sql, 
 		        								intval($program_id)
 		        							));
-	return program_genres;
+	return $program_genres;
 }
 
-// delete existing, set new genres for program  
+// delete existing, set new genres for program 
+//
 function gigpress_set_program_genres($program_id, $program_genres)
 {
 	global $wpdb;
     // Remove existing
+    $table = {$wpdb->prefix} . "gigpress_program_genres";
     $wpdb->delete($table, ['program_id' => intval($program_id)], ['%d']);
 
     // Insert new
@@ -656,7 +660,7 @@ function gigpress_set_program_genres($program_id, $program_genres)
 // ===================
 
 
-function gigpress_add_artist($program_genres) {
+function gigpress_add_artist() {
 
 	global $wpdb;
 
@@ -688,8 +692,10 @@ function gigpress_add_artist($program_genres) {
 		
 		// Was the query successful?
 		if($addartist != FALSE) 
-		{ ?>
-			gigpress_set_program_genres($program_id, $program_genres);
+		{
+			$selected_genres = explode(',',$_POST['genres']);
+			gigpress_set_program_genres($program_id, $selected_genres);
+?>			
 			<div id="message" class="updated fade"><p><?php echo wptexturize($artist['artist_name']) .' '. __("was successfully added to the database.", "gigpress"); ?></p></div>
 	<?php 
 		} 
@@ -705,7 +711,7 @@ function gigpress_add_artist($program_genres) {
 // HANDLER: UPDATE AN ARTIST
 // ======================
 
-function gigpress_update_artist($program_id, $program_genres) 
+function gigpress_update_artist() 
 {
 	global $wpdb;
 
@@ -725,6 +731,7 @@ function gigpress_update_artist($program_id, $program_genres)
 	} 
 	else 
 	{
+		$artist_id = absint($_POST['artist_id']);
 		$alpha = preg_replace("/^(an |the |a )/ui", "",
 								strtolower($_POST['artist_name']));
 		$artist = array(
@@ -734,13 +741,15 @@ function gigpress_update_artist($program_id, $program_genres)
 			'program_notes' => gigpress_db_in($_POST['program_notes'], FALSE)
 		);
 		$format = array('%s', '%s', '%s', '%s');
-		$where = array('artist_id' => absint($_POST['artist_id']));
-		$updateartist = $wpdb->update(GIGPRESS_ARTISTS, $artist, $where, $format, array('%d'));
+		$where = array('artist_id' => $artist_id));
+		$updateartist = $wpdb->update(GIGPRESS_ARTISTS, $artist, $where $format, array('%d'));
 
 		// Was the query successful?
-		if($updateartist != FALSE) 
+		if($updateartist != FALSE) ,
 		{
-			gigpress_set_program_genres($program_id, $program_genres);
+			$selected_genres = explode(',',$_POST['genres']);
+print_r($selected_genres);
+			gigpress_set_program_genres($artist_id, $selected_genres);
 ?>
 			<div id="message" class="updated fade"><p><?php echo wptexturize($artist['artist_name']) .' '. __("successfully updated.", "gigpress"); ?></p></div>
 <?php 
@@ -770,7 +779,10 @@ function gigpress_delete_artist() {
 
 	// Delete the artist
 	$trashartist = $wpdb->query($wpdb->prepare("DELETE FROM ". GIGPRESS_ARTISTS ." WHERE artist_id = %d LIMIT 1", absint($_GET['artist_id'])));
-	if($trashartist != FALSE) {	?>
+	if($trashartist != FALSE) 
+	{
+		gigpress_set_program_genres($_GET['artist_id'], array());
+?>
 		<div id="message" class="updated fade"><p><?php _e("Program successfully deleted.", "gigpress"); ?></p></div>
 	<?php } elseif($trashartist === FALSE) { ?>
 

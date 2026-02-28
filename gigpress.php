@@ -525,7 +525,6 @@ function gigpress_admin_pagination( $total_records, $records_per_page, $args ) {
 	}
 }
 
-
 function gigpress_db_in( $value, $strip_tags = TRUE ) {
 	$value = stripslashes( trim( $value ) );
 	if ( $strip_tags == TRUE) {

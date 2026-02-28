@@ -1,5 +1,7 @@
 <?php
 
+require_once('../admin/handlers.php');
+
 function gigpress_programs($filter = null, $content = null) 
 {
 
@@ -81,9 +83,10 @@ function gigpress_programs($filter = null, $content = null)
 	else
 		echo $content;
 		
-	$query .= " ORDER BY " . ($atts['artist_order'] == 'custom'
-					 ? "artist_order ASC" 
-					 : "artist_alpha ASC");
+	$query .= " ORDER BY %s ASC"; // make prepare happy
+	$params[] = ($artist_order == 'custom'
+					 ? "artist_order" 
+					 : "artist_alpha");
 	$query    = $wpdb->prepare( $query, ...$params );
 	$programs = $wpdb->get_results($query);
 
@@ -97,7 +100,6 @@ function gigpress_programs($filter = null, $content = null)
 				continue;
 
 		    // Get existing genres for this program  
-			require_once('../admin/handlers.php');
 		    $program_genres = gigpress_get_program_genres($program->artist_id);
 			if (empty(array_intersect($selected_genres,
 										wp_list_pluck(
