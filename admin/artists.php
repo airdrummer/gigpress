@@ -13,7 +13,7 @@ function gigpress_artists() {
 
 	if(isset($_POST['gpaction']) && $_POST['gpaction'] == "update") {
 		require_once('handlers.php');
-		$result = gigpress_update_artist($artist_id);
+		$result = gigpress_update_artist();
 	}
 
 	if(isset($_GET['gpaction']) && $_GET['gpaction'] == "delete") {
