@@ -38,14 +38,16 @@ function gigpress_prepare_show_fields($context = 'new') {
 	// Create a new Program
 	if($_POST['show_artist_id'] == 'new') {
 
-		$alpha = preg_replace("/^the /uix", "", strtolower($_POST['artist_name']));
+		$alpha = preg_replace("/^(an |the |a )/ui", "",
+								strtolower($_POST['artist_name']));
 		$artist = array(
 			'artist_name' => gigpress_db_in($_POST['artist_name']),
 			'artist_alpha' => gigpress_db_in($alpha),
 			'artist_url' => gigpress_db_in($_POST['artist_url'], FALSE),
 			'program_notes' => gigpress_db_in($_POST['program_notes'], FALSE)
 		);
-		$insert_artist = $wpdb->insert(GIGPRESS_ARTISTS, $artist);
+		$format = array('%s', '%s', '%s', '%s');
+		$insert_artist = $wpdb->insert(GIGPRESS_ARTISTS, $artist, $format);
 
 		if($insert_artist) {
 			$show['show_artist_id'] = $wpdb->insert_id;
@@ -641,17 +643,22 @@ function gigpress_add_artist() {
 
 	} else {
 
-		$alpha = preg_replace("/^the /uix", "", strtolower($_POST['artist_name']));
+		$alpha = preg_replace("/^(an |the |a )/ui", "",
+								strtolower($_POST['artist_name']));
 		$artist = array(
-			'artist_name' => gigpress_db_in($_POST['artist_name']),
-			'artist_alpha' => gigpress_db_in($alpha),
-			'artist_url' => gigpress_db_in($_POST['artist_url'], FALSE)
+			'artist_name'   => gigpress_db_in($_POST['artist_name']),
+			'artist_alpha'  => gigpress_db_in($alpha),
+			'artist_url'    => gigpress_db_in($_POST['artist_url'], FALSE),
+			'program_notes' => gigpress_db_in($_POST['program_notes'], FALSE)
 		);
-		$format = array('%s', '%s', '%s');
+		$format = array('%s', '%s', '%s', '%s');
 		$addartist = $wpdb->insert(GIGPRESS_ARTISTS, $artist, $format);
 
 		// Was the query successful?
-		if($addartist != FALSE) { ?>
+		if($addartist != FALSE) 
+		{ 
+			$artist_id = $wpdb->insert_id;
+?>
 			<div id="message" class="updated fade"><p><?php echo wptexturize($artist['artist_name']) .' '. __("was successfully added to the database.", "gigpress"); ?></p></div>
 	<?php } elseif($addartist === FALSE) { ?>
 			<div id="message" class="error fade"><p><?php _e("Something ain't right - try again?", "gigpress"); ?></p></div>
@@ -683,25 +690,35 @@ function gigpress_update_artist() {
 		$errors['editing'] = TRUE;
 		return $errors;
 
-	} else {
-
-		$alpha = preg_replace("/^the /uix", "", strtolower($_POST['artist_name']));
-		$artist = array(
-			'artist_name' => gigpress_db_in($_POST['artist_name']),
+	} 
+	else 
+	{
+		$artist_id = absint($_POST['artist_id']);
+		$alpha = preg_replace("/^(an |the |a )/ui", "",
+								strtolower($_POST['artist_name']));
+        $artist = array(
+			'artist_name'  => gigpress_db_in($_POST['artist_name']),
 			'artist_alpha' => gigpress_db_in($alpha),
-			'artist_url' => gigpress_db_in($_POST['artist_url'], FALSE),
+			'artist_url'   => gigpress_db_in($_POST['artist_url'], FALSE),
 			'program_notes' => gigpress_db_in($_POST['program_notes'], FALSE)
 		);
 		$format = array('%s', '%s', '%s', '%s');
-		$where = array('artist_id' => absint($_POST['artist_id']));
+		$where = array('artist_id' => $artist_id);
 		$updateartist = $wpdb->update(GIGPRESS_ARTISTS, $artist, $where, $format, array('%d'));
 
 		// Was the query successful?
-		if($updateartist != FALSE) { ?>
+		if($updateartist != FALSE) 
+		{ 
+?>
 			<div id="message" class="updated fade"><p><?php echo wptexturize($artist['artist_name']) .' '. __("successfully updated.", "gigpress"); ?></p></div>
-	<?php } elseif($updateartist === FALSE) { ?>
+<?php 
+		} 
+		elseif($updateartist === FALSE) 
+		{ 
+?>
 			<div id="message" class="error fade"><p><?php _e("Something ain't right - try again?", "gigpress"); ?></p></div>
-	<?php }
+<?php 
+		}
 		unset($artist, $where);
 	}
 }
@@ -720,24 +737,30 @@ function gigpress_delete_artist() {
 	// Check the nonce
 	check_admin_referer('gigpress-action');
 
+	$artist_id = absint($_POST['artist_id']);
 	// Delete the artist
-	$trashartist = $wpdb->query($wpdb->prepare("DELETE FROM ". GIGPRESS_ARTISTS ." WHERE artist_id = %d LIMIT 1", absint($_GET['artist_id'])));
-	if($trashartist != FALSE) {	?>
+	$trashartist = $wpdb->query($wpdb->prepare("DELETE FROM ". GIGPRESS_ARTISTS 
+								." WHERE artist_id = %d LIMIT 1", $artist_id));
+	if($trashartist != FALSE) 
+	{
+?>
 		<div id="message" class="updated fade"><p><?php _e("Program successfully deleted.", "gigpress"); ?></p></div>
-	<?php } elseif($trashartist === FALSE) { ?>
-
+<?php 
+	}
+	elseif($trashartist === FALSE) 
+	{ 
+?>
 		<div id="message" class="error fade"><p><?php _e("We ran into some trouble deleting the Program. Sorry.", "gigpress"); ?></p></div>
-	<?php }
+<?php 
+	}
 }
-
 
 
 // HANDLER: UNDO DELETING SOMETHING
 // ======================
 
-
-function gigpress_undo($type) {
-
+function gigpress_undo($type) 
+{
 	global $wpdb;
 	$wpdb->show_errors();
 
@@ -845,14 +868,16 @@ function gigpress_import() {
 
 				if(empty($artist_exists)) {
 					// Can't find an artist with this name, so we'll have to create them
-					$alpha = preg_replace("/^the /uix", "", strtolower($show['Artist']));
+                    $alpha = preg_replace("/^(an |the |a )/ui", "",
+								            strtolower($_POST['artist_name']));
 					$new_artist = array(
 						'artist_name' => gigpress_db_in($show['Program']),
 						'artist_alpha' => gigpress_db_in($alpha),
 						'artist_url' => gigpress_db_in(@$show['Program URL'], FALSE),
 						'program_notes' => gigpress_db_in(@$show['Program Notes'], FALSE)
 					);
-					$wpdb->insert(GIGPRESS_ARTISTS, $new_artist, '%s');
+		            $format = array('%s', '%s', '%s', '%s');
+					$wpdb->insert(GIGPRESS_ARTISTS, $new_artist, $format);
 					$show['artist_id'] = $wpdb->insert_id;
 				} else {
 					$show['artist_id'] = $artist_exists;
