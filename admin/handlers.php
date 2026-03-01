@@ -637,7 +637,7 @@ function gigpress_set_program_genres($program_id, $program_genres)
 {
 	global $wpdb;
     // Remove existing
-    $table = {$wpdb->prefix} . "gigpress_program_genres";
+    $table = $wpdb->prefix . "gigpress_program_genres";
     $wpdb->delete($table, ['program_id' => intval($program_id)], ['%d']);
 
     // Insert new
@@ -742,10 +742,10 @@ function gigpress_update_artist()
 		);
 		$format = array('%s', '%s', '%s', '%s');
 		$where = array('artist_id' => $artist_id));
-		$updateartist = $wpdb->update(GIGPRESS_ARTISTS, $artist, $where $format, array('%d'));
+		$updateartist = $wpdb->update(GIGPRESS_ARTISTS, $artist, $where, $format, array('%d'));
 
 		// Was the query successful?
-		if($updateartist != FALSE) ,
+		if($updateartist != FALSE) 
 		{
 			$selected_genres = explode(',',$_POST['genres']);
 print_r($selected_genres);

@@ -1,6 +1,6 @@
 <?php
 
-require_once('../admin/handlers.php');
+require_once WP_PLUGIN_DIR . '/gigpress/admin/handlers.php';
 
 function gigpress_programs($filter = null, $content = null) 
 {
@@ -83,10 +83,11 @@ function gigpress_programs($filter = null, $content = null)
 	else
 		echo $content;
 		
-	$query .= " ORDER BY %s ASC"; // make prepare happy
-	$params[] = ($artist_order == 'custom'
+	$query .= " ORDER BY " 
+				. (	$atts['artist_order'] == 'custom'
 					 ? "artist_order" 
-					 : "artist_alpha");
+					 : "artist_alpha")
+				. " ASC";
 	$query    = $wpdb->prepare( $query, ...$params );
 	$programs = $wpdb->get_results($query);
 
