@@ -8,7 +8,7 @@ function gp_add_query_vars($qVars) //  shortcode atts are lowercase
         $qVars[] = "program_id";
         $qVars[] = "exclude";
         $qVars[] = "artist_order";
-        $qVars[] = "genre";
+        $qVars[] = "genres";
         $qVars[] = "logic";
         $qVars[] = "search";
         return $qVars;
@@ -40,6 +40,8 @@ function gigpress_programs($filter = null, $content = null)
 					'program_id' => FALSE,
 					'exclude' => FALSE,
 					'artist_order' => 'alpha',
+					'logic' => 'OR',
+					'search' => '',
 					'genres' => FALSE
 					), 
 				$filter) );
@@ -122,7 +124,7 @@ function gigpress_programs($filter = null, $content = null)
 		}
 		$query .= " where " . implode(" $logic ", $where_parts);
  	}
-	else if(! empty($selected_genres))
+	else if(! empty($selected_genres)) // this doesn't work
 	{
 		$artist_ids = gigpress_get_genre_artist_ids(
 							gigpress_genre_slugs_to_ids($selected_genres), $logic);

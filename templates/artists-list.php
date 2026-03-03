@@ -8,7 +8,7 @@
 
 		if(!empty($showdata['program_notes']))
 		{
-			echo '<div class="prog-note" id="prognote-' . $showdata['artist_id'] . '><!-- start prog-note -->';
+			echo '<div class="prog-note" id="prognote-' . $showdata['artist_id'] . '" ><!-- start prog-note -->';
 			echo $showdata['program_notes'];
 			if(!empty($gpo['artist_link'])
 		  	&& !empty($showdata['artist_url'])

@@ -3,9 +3,11 @@
 	 {
 		echo "<h4>" 
 		    . (count($programs)  
-						? count($programs) . " program" . (count($programs) >1 ? "s" : '')
-						: "no programs")
-		    . " matching '" . implode("' $logic '",
+					? count($programs) . " program" . (count($programs) >1 
+							? "s" 
+							: '')
+					: "no programs")
+		    . " matching '" . implode("' " . strtolower($logic) . " '",
 					                array_merge($srchstrgs, $selected_genres))
             . "'</h4>";
 	 }

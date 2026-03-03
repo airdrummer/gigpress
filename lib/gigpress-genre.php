@@ -91,22 +91,21 @@ function gigpress_get_genre_artist_ids( array $genre_ids, $logic ): array
     {
     	$format = implode( ',', array_fill( 0, count( $genre_ids ), '%d' ) );
 		$sql   .= $wpdb->prepare("genre_id IN ($format)", $genre_ids);
+    	$artist_ids = $wpdb->get_col($sql);
     }
-    else
+    else // AND
     {
-		$where_parts = array();
-		$params      = array();
+		$artist_ids = [];
 		foreach ( $genre_ids as $genre_id )
-		{
-			$where_parts[] = "genre_id = %d";
-			$params[]      = $genre_id;
-		}
-		$sql .= $wpdb->prepare(implode(" AND ", $where_parts), ...$params);
+			$artist_ids[] = $wpdb->get_col(
+								$wpdb->prepare($sql . "genre_id = %d", $genre_id));
+		$artist_ids = array_values(
+							array_intersect(...$artist_ids));
     }
-    $artist_ids = $wpdb->get_col($sql);
-               			
+	
     return array_map( 'intval', $artist_ids );
 } 
+
 // -------------------------------------------------------------------------
 // Admin UI
 // -------------------------------------------------------------------------
