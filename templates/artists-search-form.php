@@ -38,6 +38,15 @@
 </details>
 </div>
 <script>
+    function openSearch(tax_tags) 
+    {
+        document.getElementById("filter-form").open = true;
+        tax_tags.split(',').forEach(
+            function(currentString) 
+            {
+                document.getElementById(currentString + "-filter").open = true;
+            });
+    }
     document.addEventListener("DOMContentLoaded", function() 
     {
         const ff  = document.querySelector('.filter-form');

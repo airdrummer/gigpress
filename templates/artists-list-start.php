@@ -10,5 +10,7 @@
 		    . " matching '" . implode("' " . strtolower($logic) . " '",
 					                array_merge($srchstrgs, $selected_genres))
             . "'</h4>";
+        if (! $atts['genres'])
+	 		echo '<button style="float:right;" onclick="openSearch(\'genre\');">search again</button>';
 	 }
 ?>
