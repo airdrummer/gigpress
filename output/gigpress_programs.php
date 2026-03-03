@@ -136,9 +136,9 @@ function gigpress_programs($filter = null, $content = null)
 		echo $content;
 
 	$query .= " ORDER BY " 
-				. (	$atts['artist_order'] == 'custom'
-					 ? "artist_order" 
-					 : "artist_alpha")
+				. (	$atts['artist_order'] == 'alpha'
+					 ? "artist_alpha" 
+					 : "artist_order")
 				. " ASC";
 	$query    = $wpdb->prepare( $query, ...$params );
 	$programs = $wpdb->get_results($query);
