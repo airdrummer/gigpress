@@ -10,7 +10,6 @@ function gp_add_query_vars($qVars) //  shortcode atts are lowercase
         $qVars[] = "artist_order";
         $qVars[] = "genres";
         $qVars[] = "logic";
-        $qVars[] = "search";
         return $qVars;
 }
 // hook add_query_vars function into query_vars
@@ -29,7 +28,7 @@ function gp_query_atts( $atts ) // query params override shortcode atts
     return $out;
 }
 
-function gigpress_programs($filter = null, $content = null) 
+function gigpress_programs($atts = null, $content = null) 
 {
 	global $wpdb;
 	
@@ -41,16 +40,17 @@ function gigpress_programs($filter = null, $content = null)
 					'exclude' => FALSE,
 					'artist_order' => 'alpha',
 					'logic' => 'OR',
-					'search' => '',
 					'genres' => FALSE
 					), 
-				$filter) );
+				$atts),  'gigpress_programs');
 
 	if($atts['artist'])
 		$atts['program_id'] = $atts['artist'];
     $excluded_ids     = $atts['exclude'] ? explode(",",$atts['exclude']) : array();
-    $selected_genres  = $atts['genres']  ? sanitize_text_field(explode(",",$atts['genres'])) : array();
-
+    $selected_genres  = $atts['genres']  ? explode(",",sanitize_text_field($atts['genres'])) : array();
+	$logic = ($atts['logic'] && strtoupper($atts['logic']) === 'AND') ? 'AND' : 'OR';
+    $srchstrgs = [];
+        
 	ob_start();
 	
 	include gigpress_template('artists-search-form');
@@ -89,7 +89,7 @@ function gigpress_programs($filter = null, $content = null)
             if ($srchstrg)
                 $srchstrgs[] = $srchstrg;
         }
-        		
+
 	    if ( ! empty($srchstrgs) ) 
 	    {
 		    $where_parts = array();
@@ -124,7 +124,7 @@ function gigpress_programs($filter = null, $content = null)
 		}
 		$query .= " where " . implode(" $logic ", $where_parts);
  	}
-	else if(! empty($selected_genres)) // this doesn't work
+	else if(! empty($selected_genres))
 	{
 		$artist_ids = gigpress_get_genre_artist_ids(
 							gigpress_genre_slugs_to_ids($selected_genres), $logic);
