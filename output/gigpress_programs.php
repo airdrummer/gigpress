@@ -1,35 +1,53 @@
 <?php
 
+require_once WP_PLUGIN_DIR . '/gigpress/admin/handlers.php';
+
+function gp_add_query_vars($qVars) //  shortcode atts are lowercase
+{
+        $qVars[] = "artist";
+        $qVars[] = "program_id";
+        $qVars[] = "exclude";
+        $qVars[] = "artist_order";
+        $qVars[] = "genre";
+        $qVars[] = "logic";
+        $qVars[] = "search";
+        return $qVars;
+}
+// hook add_query_vars function into query_vars
+add_filter('query_vars', 'gp_add_query_vars');
+
+function gp_query_atts( $atts ) // query params override shortcode atts
+{
+    global $wp_query;
+    $atts = (array)$atts;
+    $out  = array();
+    foreach($atts as $name => $default) 
+    {
+        $qv = $wp_query->query_vars[$name];
+        $out[$name] = ( !empty($qv) ? $qv : $default );
+    }
+    return $out;
+}
+
 function gigpress_programs($filter = null, $content = null) 
 {
-
-	global $wpdb, $gpo;
-	$and_where = $limit = '';
+	global $wpdb;
 	
-	extract(shortcode_atts(array(
-			'artist' => FALSE,
-			'program_id' => FALSE,
-			'exclude' => FALSE,
-			'artist_order' => 'alpha'
-		), $filter)
-	);
+    $atts = gp_query_atts( // url query params
+			  shortcode_atts(
+				array(
+					'artist' => FALSE,
+					'program_id' => FALSE,
+					'exclude' => FALSE,
+					'artist_order' => 'alpha',
+					'genres' => FALSE
+					), 
+				$filter) );
 
-	if($artist)
-		$program_id = $artist;
-    if ($exclude)
-    	$exclude = explode(",",$exclude);
-    else 
-    	$exclude = array();
-
-	// Query vars take precedence over function vars
-	if(isset($_GET['artist_id']))
-		$program_id = $_GET['artist_id'];
-	if(isset($_GET['program_id']))
-		$program_id = $_GET['program_id'];
-	if(isset($_GET['exclude']))
-		$exclude = $_GET['exclude'];
-	if(isset($_GET['artist_order']))
-		$artist_order = $_GET['artist_order'];
+	if($atts['artist'])
+		$atts['program_id'] = $atts['artist'];
+    $excluded_ids     = $atts['exclude'] ? explode(",",$atts['exclude']) : array();
+    $selected_genres  = $atts['genres']  ? sanitize_text_field(explode(",",$atts['genres'])) : array();
 
 	ob_start();
 	
@@ -38,21 +56,21 @@ function gigpress_programs($filter = null, $content = null)
 	$query = "SELECT * FROM " . GIGPRESS_ARTISTS;
 	$params = array();
 
-	if( $program_id )
+	if( $atts['program_id'] )
 	{
 		$query .= ' where artist_id = %d' ;
-		$params[] = $program_id;
+		$params[] = $atts['program_id'];
 	}
-	else if ( $_SERVER['REQUEST_METHOD'] === 'POST' &&
-              ! empty($_POST['search']) &&
-              ! empty($_POST['gp_artist_search_nonce']) &&
-                wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action'))
+	else if ( $_SERVER['REQUEST_METHOD'] === 'POST' 
+			&& (! empty($_POST['search']) || ! empty($_POST['gp_artist_genres'])
+			&& ! empty($_POST['gp_artist_search_nonce']) &&
+                wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action')))
  	{
 	    $logic = (isset($_POST['logic']) 
-	    			&& strtoupper($_POST['logic']) === 'OR')
-			        ? 'OR'
-			        : 'AND';
-    	$search_note = !empty($_POST['search_note']);
+	    			&& strtoupper($_POST['logic']) === 'AND')
+			        ? 'AND'
+			        : 'OR';
+    	$search_notes = !empty($_POST['search_note']);
     	
  		$search_string = sanitize_text_field( wp_unslash($_POST['search']) );
         // 1. Strip any slashes added by WordPress/PHP magic quotes
@@ -60,59 +78,84 @@ function gigpress_programs($filter = null, $content = null)
         // PREG_SET_ORDER keeps the match groups tied to the specific hit
         preg_match_all('/"([^"]+)"|(\S+)/', $search_string, $matches, PREG_SET_ORDER);
         
-        $terms = [];
+        $srchstrgs = [];
         foreach ($matches as $match) 
         {
             // Index 1 is the inner content of " "
             // Index 2 is the standalone word
-            $term = !empty($match[1]) ? $match[1] : $match[2];
-            if ($term)
-                $terms[] = $term;
+            $srchstrg = !empty($match[1]) ? $match[1] : $match[2];
+            if ($srchstrg)
+                $srchstrgs[] = $srchstrg;
         }
-
-	    if ( ! empty($terms) ) 
+        		
+	    if ( ! empty($srchstrgs) ) 
 	    {
 		    $where_parts = array();
 		
-		    foreach ( $terms as $term ) 
+		    foreach ( $srchstrgs as $srchstrg ) 
 		    {
-		        $like = '%' . $wpdb->esc_like( str_replace('"','',$term )) . '%';
+		        $like = '%' . $wpdb->esc_like( $srchstrg ) . '%';
 		        $where_parts[] = "(artist_name LIKE %s"
-		        				 . ($search_note
+		        				 . ($search_notes
 		        				 	?	" OR program_notes LIKE %s)"
 		        				 	:	")");
 		        $params[] = $like;
-		        if ( $search_note ) 
+		        if ( $search_notes ) 
 		            $params[] = $like;
 		    }
-		    $query .= " where " . implode(" $logic ", $where_parts);
-    	    $exclude = array();
 	    }
+	    
+		$selected_genre_ids = gigpress_get_selected_genre_ids();
+		if ( ! empty($selected_genre_ids))
+		{
+			$artist_ids = gigpress_get_genre_artist_ids($selected_genre_ids, $logic);
+	    	$format     = implode( ',', array_fill( 0, count( $artist_ids ), '%d' ) );
+			$where_parts[] = "(artist_id IN ($format))";
+			$params = array_merge($params, $artist_ids);
+			$selected_genres = wp_list_pluck(
+									get_terms( [
+        									'taxonomy'   => 'genre',
+        									'include'    => $selected_genre_ids,
+									        'hide_empty' => false,
+										   		] ),
+									'name');
+		}
+		$query .= " where " . implode(" $logic ", $where_parts);
  	}
-	else
+	else if(! empty($selected_genres))
+	{
+		$artist_ids = gigpress_get_genre_artist_ids(
+							gigpress_genre_slugs_to_ids($selected_genres), $logic);
+	    $format     = implode( ',', array_fill( 0, count( $artist_ids ), '%d' ) );
+	
+	    $query .= $wpdb->prepare(" WHERE artist_id IN ($format)", $artist_ids);
+	}
+	else	
 		echo $content;
 
-	$query .= " ORDER BY " . ($artist_order == 'custom'
-					 ? "artist_order ASC" 
-					 : "artist_alpha ASC");
+	$query .= " ORDER BY " 
+				. (	$atts['artist_order'] == 'custom'
+					 ? "artist_order" 
+					 : "artist_alpha")
+				. " ASC";
 	$query    = $wpdb->prepare( $query, ...$params );
 	$programs = $wpdb->get_results($query);
 
-	if ( count($programs) == 0 )
-		include gigpress_template('artists-list-empty');
-	else
+	include gigpress_template('artists-list-start');
+	
+	if ( count($programs) > 0 )
 	{
-		include gigpress_template('artists-list-start');
-		
 		foreach($programs as $program) 
 		{
-			if (in_array($program->artist_id, $exclude))
+			if (in_array($program->artist_id, $excluded_ids))
 				continue;
+
 			$showdata = array();
 			$showdata['artist']        = $program->artist_name;
 			$showdata['artist_id']     = $program->artist_id;
 			$showdata['artist_url']    = $program->artist_url;
 			$showdata['program_notes'] = $program->program_notes;
+			$showdata['genres']        = gigpress_artist_genre_string($program->artist_id);
 	
 			include gigpress_template('artists-list');
 		}

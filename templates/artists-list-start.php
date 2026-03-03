@@ -1,5 +1,14 @@
 <?php
-	 if(!empty($_POST['search']))
-		echo "<h4>" . count($programs) . " program". (count($programs) >1 ? "s" : '')
-		    ." found matching '" . implode("' $logic '", $terms) . "'</h4>";
+	 if(!empty($srchstrgs) || !empty($selected_genres))
+	 {
+		echo "<h4>" . (count($programs)  
+						? count($programs) . " program" . (count($programs) >1 ? "s" : '')
+						: "no programs")
+		    ." matching '";
+		echo implode(" $logic ",
+					 [ implode("' $logic '", $srchstrgs),
+					   implode("' $logic '", $selected_genres)
+					 ]);
+		echo "'</h4>";
+	 }		
 ?>

@@ -23,9 +23,14 @@
 	               name="search_note"
 	               value="1"
 	               <?php checked($_POST['search_note'] ?? '', '1'); ?>>
-	        Include&nbsp;program&nbsp;notes in&nbsp;search
+	         also&nbsp;search&nbsp;description
 	    </label>
 	<br>
+		<details id="genre-filter"><summary>by genre</summary>
+<?php
+		gigpress_genre_checkboxes($atts['program_id']); 
+?>
+		</details>
 	    <button type="submit" name="gp_artist_search_submit">Search</button>
 	    <br>
 	    <a href="<?php echo esc_url( get_permalink() ); ?>" class="clear-button">Clear all</a>

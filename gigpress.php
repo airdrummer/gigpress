@@ -3,7 +3,7 @@
  * Plugin Name: GigPress
  * Plugin URI:  https://evnt.is/1aca
  * Description: GigPress is a live performance listing and management plugin built for musicians and performers.
- * Version:     2.3.29.3.1
+ * Version:     2.3.29.4
  * Author:      The Events Calendar
  * Author URI:  https://evnt.is/1aor
  * Text Domain: gigpress
@@ -29,6 +29,9 @@ GNU General Public License for more details.
 global $wpdb;
 
 // Define useful constants
+if ( ! defined( 'GIGPRESS_ARTIST_GENRE' ) ) 
+    define( 'GIGPRESS_ARTIST_GENRE', $wpdb->prefix . 'gigpress_artist_genre' );
+
 if ( ! defined( 'GIGPRESS_SHOWS' ) ) 
 	define( 'GIGPRESS_SHOWS', $wpdb->prefix . 'gigpress_shows' );
 
@@ -42,10 +45,10 @@ if ( ! defined( 'GIGPRESS_VENUES' ) )
 	define( 'GIGPRESS_VENUES', $wpdb->prefix . 'gigpress_venues' );
 
 if ( ! defined( 'GIGPRESS_VERSION' ) )
-	define( 'GIGPRESS_VERSION', '2.3.29.3.1' );
+	define( 'GIGPRESS_VERSION', '2.3.29.4' );
 
 if ( ! defined( 'GIGPRESS_DB_VERSION' ) )
-	define( 'GIGPRESS_DB_VERSION', '1.7' );
+	define( 'GIGPRESS_DB_VERSION', '1.8' );
 
 if ( ! defined( 'GIGPRESS_RSS' ) )
 	define( 'GIGPRESS_RSS', get_bloginfo( 'url' ) . '/?feed=gigpress' );
@@ -98,6 +101,8 @@ require( 'output/gigpress_related.php' );
 require( 'output/gigpress_sidebar.php' );
 require( 'output/feed.php' );
 require( 'output/ical.php' );
+
+require( 'lib/gigpress-genre.php' );
 
 function gigpress_admin_menu() {
 
