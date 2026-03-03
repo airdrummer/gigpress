@@ -128,6 +128,8 @@ function gigpress_programs($atts = null, $content = null)
 	{
 		$artist_ids = gigpress_get_genre_artist_ids(
 							gigpress_genre_slugs_to_ids($selected_genres), $logic);
+		if(empty($artist_ids))
+			$artist_ids = [0];
 	    $format     = implode( ',', array_fill( 0, count( $artist_ids ), '%d' ) );
 	
 	    $query .= $wpdb->prepare(" WHERE artist_id IN ($format)", $artist_ids);
