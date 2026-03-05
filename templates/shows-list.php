@@ -38,11 +38,16 @@ if($yr != $current_year) :
 						onclick="return showInfo('prog-note-<?php echo $showdata['id']; ?>')" >
 			<h2 class="progtitle" ><?php echo bc_bankhead($current_program); ?></h2></a>
 
-	<?php if(!empty($showdata['program_notes'])) : ?>
+	<?php if(!empty($showdata['program_notes'])
+		  || !empty($showdata['program_genres'])) : ?>
 		<div class="prog-note"
 			 <?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
 			 id="prog-note-<?php echo $showdata['id']; ?>"> <!-- start prog-note -->
-			<?php echo $showdata['program_notes']; ?>
+<?php 
+			echo $showdata['program_notes']; 
+			if (!empty($showdata['program_genres']))
+				echo '<div class="floatright prog-genres" style="margin-top:-1em;">' . $showdata['program_genres'] . '</div><br>'; 
+?>
 			<div class="prog-note-toggle">&nbsp;
 				<a title='click to hide program description'
 					href="#prog-<?php echo $showdata['id']; ?>"
@@ -134,6 +139,7 @@ if($yr != $current_year) :
 		  or !empty($showdata['artist_url'])) : ?>
 		<br clear=both> <!-- start gig-note -->
 		<div class="gig-note" 
+		<?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
 		        id="gignote-<?php echo $showdata['id']; ?>" >
 			<?php if(!empty($showdata['notes'])) echo $showdata['notes']; ?>
 			<?php if(!empty($showdata['artist_url'])) : ?>

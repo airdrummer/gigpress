@@ -19,7 +19,7 @@
 		}
 
 		if(!empty($showdata['genres']))
-			echo "<div class='floatright prog-genres'>Genres: " . $showdata['genres'] . "</div><br style='clear:both;'>";
+			echo "<div class='floatright prog-genres'>" . $showdata['genres'] . "</div><br style='clear:both;'>";
 
 		echo '<div class="more-info info-right">';	
 		echo 	'<a href="/performances/?program_id='

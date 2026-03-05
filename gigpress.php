@@ -322,11 +322,14 @@ function gigpress_prepare( $show, $scope = 'public' ) {
 	if ( $scope != 'venue' ) {
 		$timeparts = explode( ':', $show->show_time );
 		$showdata['admittance'] = ( ! empty( $show->show_ages ) && $show->show_ages != 'Not sure' ) ? wptexturize( $show->show_ages ) : '';
+
 		$showdata['artist'] = ( ! empty( $show->artist_url) && ! empty( $gpo['artist_link'] ) && $scope != 'admin' ) ? '<a href="' . esc_url( $show->artist_url ) . '"' . gigpress_target( $show->artist_url) . '>' . wptexturize( $show->artist_name ) . '</a>' : wptexturize( $show->artist_name );
 		$showdata['artist_plain'] = wptexturize( $show->artist_name );
 		$showdata['artist_id'] = $show->artist_id;
 		$showdata['artist_url'] = (!empty($show->artist_url)) ? esc_url($show->artist_url) : '';
 		if(!empty($show->program_notes)) $showdata['program_notes'] =  wptexturize( do_shortcode($show->program_notes)) . ' ';
+		$showdata['program_genres'] = gigpress_artist_genre_string($show->artist_id);
+
 		$showdata['calendar_summary'] = $show->artist_name . ' ' . __("at", "gigpress") . ' ' . $show->venue_name;
 		$showdata['calendar_summary_ical'] = str_replace(array(";",","), array('\;','\,'), $showdata['calendar_summary']);
 		$showdata['calendar_details'] = '';

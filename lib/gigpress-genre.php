@@ -215,12 +215,23 @@ function gigpress_get_artist_genre_terms( int $artist_id ): array
  *
  * @param  int    $artist_id
  * @param  string $sep
+ * @param  bool   $add_label
  * @return string
  */
-function gigpress_artist_genre_string( int $artist_id, string $sep = ', ' ): string 
+function gigpress_artist_genre_string( int $artist_id, 
+                                       string $sep = ', ',
+                                       bool $add_label = TRUE): string 
 {
     $genres = gigpress_get_artist_genre_terms( $artist_id );
-	return implode( $sep, array_map( 
-							function( $g ) { return esc_html( $g->name ); },
-							$genres ) );
+    if(! count($genres))
+    	return '';
+
+    return ($add_label  ? ("Genre" . (count($genres) > 1 
+                                        ? "s" 
+                                        : "") . ': ')
+                        : '')
+            . implode( $sep, array_map( 
+                                function( $g ) 
+                                    { return esc_html( $g->name ); }, 
+                                $genres ) );
 }

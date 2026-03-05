@@ -49,14 +49,11 @@ function gigpress_shows( $filter = null, $content = null )
 	$sort = gigpress_sanitize_sort($sort);
 	// Query vars take precedence over function vars
 	if(isset($_REQUEST['condensed']))
-		$condensed = $_REQUEST['condensed'];
+		$condensed = sanitize_text_field($_REQUEST['condensed']);
 	$condensed = 0 + $condensed;
 
 	if(isset($_REQUEST['scope']))
-		$scope = $_REQUEST['scope'];
-
-	if(isset($_REQUEST['scope']))
-		$scope = $_REQUEST['scope'];
+		$scope = sanitize_text_field($_REQUEST['scope']);
 		
 	// Date conditionals and sorting based on scope
 	switch($scope) 
@@ -84,9 +81,9 @@ function gigpress_shows( $filter = null, $content = null )
 	if($artist)
 		$program_id = $artist;
 	if(isset($_REQUEST['artist_id']))
-		$program_id = $_REQUEST['artist_id'];
+		$program_id = sanitize_text_field($_REQUEST['artist_id']);
 	if(isset($_REQUEST['program_id']))
-		$program_id = $_REQUEST['program_id'];
+		$program_id = sanitize_text_field($_REQUEST['program_id']);
 		
 	$total_programs = ( $program_id
 					   ? 1
@@ -107,18 +104,18 @@ function gigpress_shows( $filter = null, $content = null )
 		
 	if(isset($_REQUEST['gpy']))
 	{ 
-		$year = $_REQUEST['gpy'];
+		$year = sanitize_text_field($_REQUEST['gpy']);
 		$limit = '';
 		unset($month);
 	}
 	if(isset($_REQUEST['gpm']))
 	{ 
-		$month = $_REQUEST['gpm'];
+		$month = sanitize_text_field($_REQUEST['gpm']);
 		$limit = '';
 	}
 	// Validate year and date parameters
 	if ( $year || $month ) 
-{	
+	{	
 		$dateRange = ' of this year';
 		$thisYear = date('Y', current_time('timestamp'));
 		if($year) 
@@ -201,7 +198,8 @@ function gigpress_shows( $filter = null, $content = null )
 		$programs = $wpdb->get_results("SELECT * FROM " . GIGPRESS_ARTISTS
 										 . " ORDER BY " . $artist_order . "artist_alpha ASC");
 		
-		foreach($programs as $program_group) {
+		foreach($programs as $program_group) 
+		{
 			$shows = $wpdb->get_results("SELECT * FROM " . GIGPRESS_ARTISTS . " AS a, " . GIGPRESS_VENUES . " as v, "
 			 . GIGPRESS_SHOWS . " AS s LEFT JOIN  " . GIGPRESS_TOURS . " AS t ON s.show_tour_id = t.tour_id WHERE "
 			  . $date_condition . $and_atv_conditions . " AND s.show_artist_id = " . $program_group->artist_id 
@@ -230,7 +228,7 @@ function gigpress_shows( $filter = null, $content = null )
 
 				include gigpress_template('shows-artist-heading');
 				include gigpress_template('shows-list-start');
-											
+								
 				foreach($shows as $show) // For each individual show
 				{
 					$showdata = gigpress_prepare($show, 'public');
@@ -281,9 +279,8 @@ function gigpress_shows( $filter = null, $content = null )
 		{	
 			// No shows from any program
 			include gigpress_template('shows-list-empty');
-		}
-		
-	} 
+		}	
+	  }
 	}
 	else // Not grouping by programs or showing program or only 1 program
 	{
@@ -423,9 +420,9 @@ function gigpress_menu( $options = null ) {
 	if($artist)
 		$program_id = $artist;
 	if(isset($_REQUEST['artist']))
-		$program_id = $_REQUEST['artist'];
+		$program_id = sanitize_text_field($_REQUEST['artist']);
 	if(isset($_REQUEST['program_id']))
-		$program_id = $_REQUEST['program_id'];
+		$program_id = sanitize_text_field($_REQUEST['program_id']);
 		
 	$and_atv_conditions = '';	// program, tour and venue filtering
 	if($program_id) 
@@ -440,12 +437,18 @@ function gigpress_menu( $options = null ) {
 			$sql_select_extra = 'MONTH(show_date) AS month, ';
 			$sql_group_extra = ', MONTH(show_date)';
 			$title = ($title) ? wptexturize(strip_tags($title)) : __('Select Month', 'gigpress');
-			$current = (isset($_REQUEST['gpy']) && isset($_REQUEST['gpm'])) ? $_REQUEST['gpy'].$_REQUEST['gpm'] : '';
+			$current = (isset($_REQUEST['gpy']) 
+							&& isset($_REQUEST['gpm'])) 
+							? sanitize_text_field(
+								$_REQUEST['gpy'].$_REQUEST['gpm']) 
+							: '';
 			break;
 		case 'yearly':
 			$sql_select_extra = $sql_group_extra = '';
 			$title = ($title) ? wptexturize(strip_tags($title)) : __('Select Year', 'gigpress');
-			$current = (isset($_REQUEST['gpy'])) ? $_REQUEST['gpy'] : '';
+			$current = (isset($_REQUEST['gpy'])) 
+						? sanitize_text_field($_REQUEST['gpy']) 
+						: '';
 	}
 	
 	// Build query
@@ -496,9 +499,9 @@ function gigpress_has_upcoming($filter = null)
 	if($artist)
 		$program_id = $artist;
 	if(isset($_REQUEST['artist']))
-		$program_id = $_REQUEST['artist'];
+		$program_id = sanitize_text_field($_REQUEST['artist']);
 	if(isset($_REQUEST['program_id']))
-		$program_id = $_REQUEST['program_id'];
+		$program_id = sanitize_text_field($_REQUEST['program_id']);
 	
 	// program, tour and venue filtering
 	if($program_id) $and_where .= ' AND show_artist_id = ' . $wpdb->prepare('%d', $program_id);
