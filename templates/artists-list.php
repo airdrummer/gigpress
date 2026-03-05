@@ -27,17 +27,17 @@
 				  . '&nbsp;&nbsp;&nbsp; <a href="/performances/past-performances/?program_id='
 				  . $showdata['artist_id'] . '"><h3 class=gig-pup>Past&nbsp;Performances</h3></a>';
 
-		if(!empty($gpo['display_subscriptions']))
-		{
-			echo '<div class="info-right">';
-			echo ' <a href="'. GIGPRESS_RSS . '&amp;program_id=' . $showdata['artist_id']
-				 . '" alt="subscribe to RSS feed" title="subscribe to RSS feed">'
-				 . '<img src="' . plugins_url('/gigpress/images/feed-icon-12x12.png') . '" /></a>'
-		    . '&nbsp;<a href="' . GIGPRESS_WEBCAL . '&amp;program_id=' . $showdata['artist_id'] 
-				 . '" alt="subscribe to iCalendar" title="subscribe to iCalendar">'
-			     . '<img src="'. plugins_url('/gigpress/images/icalendar-icon.gif') . '" /></a>';
-			echo '</div>';
-		}
+			if(!empty($gpo['display_subscriptions']))
+			{
+				echo '<div class="info-right">';
+				echo ' <a href="'. GIGPRESS_RSS . '&amp;program_id=' . $showdata['artist_id']
+					 . '" alt="subscribe to RSS feed" title="subscribe to RSS feed">'
+					 . '<img src="' . plugins_url('/gigpress/images/feed-icon-12x12.png') . '" /></a>'
+			    . '&nbsp;<a href="' . GIGPRESS_WEBCAL . '&amp;program_id=' . $showdata['artist_id'] 
+					 . '" alt="subscribe to iCalendar" title="subscribe to iCalendar">'
+				     . '<img src="'. plugins_url('/gigpress/images/icalendar-icon.gif') . '" /></a>';
+				echo '</div>';
+			}
 		echo '</div>';
 ?>
 <br clear=both>
