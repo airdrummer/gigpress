@@ -58,12 +58,7 @@ function gigpress_programs($atts = null, $content = null)
 	$query = "SELECT * FROM " . GIGPRESS_ARTISTS;
 	$params = array();
 
-	if( $atts['program_id'] )
-	{
-		$query .= ' where artist_id = %d' ;
-		$params[] = $atts['program_id'];
-	}
-	else if ( $_SERVER['REQUEST_METHOD'] === 'POST' 
+	if ( $_SERVER['REQUEST_METHOD'] === 'POST' 
 			&& (! empty($_POST['search']) || ! empty($_POST['gp_artist_genres'])
 			&& ! empty($_POST['gp_artist_search_nonce']) &&
                 wp_verify_nonce($_POST['gp_artist_search_nonce'], 'gp_artist_search_action')))
@@ -123,8 +118,9 @@ function gigpress_programs($atts = null, $content = null)
 									'name');
 		}
 		$query .= " where " . implode(" $logic ", $where_parts);
+		$atts['genres'] = false;
  	}
-	else if(! empty($selected_genres))
+	else if($atts['genres'])
 	{
 		$artist_ids = gigpress_get_genre_artist_ids(
 							gigpress_genre_slugs_to_ids($selected_genres), $logic);
@@ -134,7 +130,13 @@ function gigpress_programs($atts = null, $content = null)
 	
 	    $query .= $wpdb->prepare(" WHERE artist_id IN ($format)", $artist_ids);
 	}
-	else	
+	else if( $atts['program_id'] )
+	{
+		$query .= ' where artist_id = %d' ;
+		$params[] = $atts['program_id'];
+		$atts['genres'] = false;
+	}
+	else 	
 		echo $content;
 
 	$query .= " ORDER BY " 

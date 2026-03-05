@@ -9,15 +9,6 @@
 	           value="<?php echo wp_unslash(esc_attr($_POST['search'] ?? '')); ?>"
 	           placeholder='enclose "phrases in quotes"'>
 	
-	    <select name="logic">
-	        <option value="OR" <?php selected($_POST['logic'] ?? '', 'OR'); ?>>
-	            Match ANY word
-	        </option>
-	        <option value="AND" <?php selected($_POST['logic'] ?? '', 'AND'); ?>>
-	            Match ALL words
-	        </option>
-	    </select>
-	<br>
 	    <label>
 	        <input type="checkbox"
 	               name="search_note"
@@ -26,7 +17,16 @@
 	         also&nbsp;search&nbsp;description
 	    </label>
 	<br>
-		<details id="genre-filter"><summary>by genre</summary>
+	    <select name="logic">
+	        <option value="OR" <?php selected($_POST['logic'] ?? '', 'OR'); ?>>
+	            Match ANY word or genre
+	        </option>
+	        <option value="AND" <?php selected($_POST['logic'] ?? '', 'AND'); ?>>
+	            Match ALL words and genres
+	        </option>
+	    </select>
+	<br>
+		<details id="genre-filter" open=""><summary>by genre</summary>
 <?php
 		gigpress_genre_checkboxes($atts['program_id']); 
 ?>
