@@ -56,6 +56,7 @@ function gigpress_programs($atts = null, $content = null)
 	include gigpress_template('artists-search-form');
 
 	$query = "SELECT * FROM " . GIGPRESS_ARTISTS;
+    $where_parts = array();
 	$params = array();
 
 	if ( $_SERVER['REQUEST_METHOD'] === 'POST' 
@@ -87,8 +88,6 @@ function gigpress_programs($atts = null, $content = null)
 
 	    if ( ! empty($srchstrgs) ) 
 	    {
-		    $where_parts = array();
-		
 		    foreach ( $srchstrgs as $srchstrg ) 
 		    {
 		        $like = '%' . $wpdb->esc_like( $srchstrg ) . '%';
@@ -105,16 +104,12 @@ function gigpress_programs($atts = null, $content = null)
 		$selected_genre_ids = gigpress_get_selected_genre_ids();
 		if ( ! empty($selected_genre_ids))
 		{
-			$artist_ids = gigpress_get_genre_artist_ids($selected_genre_ids, $logic);
+			$artist_ids = gigpress_get_artist_ids_from_genre_ids($selected_genre_ids, $logic);
 	    	$format     = implode( ',', array_fill( 0, count( $artist_ids ), '%d' ) );
 			$where_parts[] = "(artist_id IN ($format))";
 			$params = array_merge($params, $artist_ids);
 			$selected_genres = wp_list_pluck(
-									get_terms( [
-        									'taxonomy'   => 'genre',
-        									'include'    => $selected_genre_ids,
-									        'hide_empty' => false,
-										   		] ),
+									gigpress_get_genre_terms($selected_genre_ids),
 									'name');
 		}
 		$query .= " where " . implode(" $logic ", $where_parts);
@@ -122,8 +117,9 @@ function gigpress_programs($atts = null, $content = null)
  	}
 	else if($atts['genres'])
 	{
-		$artist_ids = gigpress_get_genre_artist_ids(
-							gigpress_genre_slugs_to_ids($selected_genres), $logic);
+        $genres = gigpress_genre_slugs_to_genres($selected_genres);
+        $selected_genres = gigpress_genre_string( $genres, " $logic ");
+		$artist_ids = gigpress_get_genre_artist_ids($genres, $logic);
 		if(empty($artist_ids))
 			$artist_ids = [0];
 	    $format     = implode( ',', array_fill( 0, count( $artist_ids ), '%d' ) );

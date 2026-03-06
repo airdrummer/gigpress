@@ -74,10 +74,17 @@ function gigpress_delete_artist_genres( int $artist_id ): void
 /**
  * Get all artist_ids associated with a term — useful for filtering shows by genre.
  *
- * @param  array   $genre_id
+ * @param  array   $genre_ids
  * @return int[]
  */
-function gigpress_get_genre_artist_ids( array $genre_ids, $logic ): array 
+function gigpress_get_genre_artist_ids( array $genres, $logic ): array 
+{
+    return gigpress_get_artist_ids_from_genre_ids(
+                        wp_list_pluck($genres, 'term_id'),
+                        $logic);
+}
+
+function gigpress_get_artist_ids_from_genre_ids( array $genre_ids, $logic ): array 
 {
     global $wpdb;
 
@@ -99,8 +106,7 @@ function gigpress_get_genre_artist_ids( array $genre_ids, $logic ): array
 		foreach ( $genre_ids as $genre_id )
 			$artist_ids[] = $wpdb->get_col(
 								$wpdb->prepare($sql . "genre_id = %d", $genre_id));
-		$artist_ids = array_values(
-							array_intersect(...$artist_ids));
+		$artist_ids = array_values(array_intersect(...$artist_ids));
     }
 	
     return array_map( 'intval', $artist_ids );
@@ -174,19 +180,24 @@ function gigpress_process_genre_save( int $artist_id ): bool
 // -------------------------------------------------------------------------
 // Frontend helpers
 // -------------------------------------------------------------------------
-
-function gigpress_genre_slugs_to_ids( array $slugs ): array 
+/**
+ * Get WP_Term objects from slugs.
+ *
+ * @param  array $slugs
+ * @return WP_Term[]
+ */
+function gigpress_genre_slugs_to_genres( array $slugs ): array 
 {
-    $genre_ids = [];
+    $genres = [];
 
     foreach ( $slugs as $slug ) 
     {
         $genre = get_term_by( 'slug', $slug, 'genre' );
         if ( $genre && ! is_wp_error( $genre ) )
-            $genre_ids[] = (int) $genre->term_id;
+            $genres[] = $genre;
     }
 
-    return $genre_ids;
+    return $genres;
 }
 
 /**
@@ -198,14 +209,19 @@ function gigpress_genre_slugs_to_ids( array $slugs ): array
 function gigpress_get_artist_genre_terms( int $artist_id ): array 
 {
     $genre_ids = gigpress_get_artist_genre_ids( $artist_id );
+    return gigpress_get_genre_terms( $genre_ids );
+}
+
+function gigpress_get_genre_terms( array $genre_ids ): array 
+{
     if ( empty( $genre_ids ) )
         return [];
 
     $genres = get_terms( [
-        'taxonomy'   => 'genre',
-        'include'    => $genre_ids,
-        'hide_empty' => false,
-    ] );
+                        'taxonomy'   => 'genre',
+                        'include'    => $genre_ids,
+                        'hide_empty' => false,
+                         ] );
 
     return is_wp_error( $genres ) ? [] : (array) $genres;
 }
@@ -223,6 +239,13 @@ function gigpress_artist_genre_string( int $artist_id,
                                        bool $add_label = TRUE): string 
 {
     $genres = gigpress_get_artist_genre_terms( $artist_id );
+    return gigpress_genre_string( $genres, $sep, $add_label);
+}
+
+function gigpress_genre_string( array $genres, 
+                                string $sep = ', ',
+                                bool $add_label = TRUE): string 
+{
     if(! count($genres))
     	return '';
 
