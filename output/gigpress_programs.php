@@ -112,9 +112,6 @@ function gigpress_programs($atts = null, $content = null)
 									gigpress_get_genre_terms($selected_genre_ids),
 									'name');
 		}
-		else
-		    $selected_genres = '';
-
 		$query .= " where " . implode(" $logic ", $where_parts);
 		$atts['genres'] = false;
  	}
