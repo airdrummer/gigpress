@@ -101,6 +101,7 @@ function gigpress_artists()
 			    <th scope="row"><?php _e( 'Genres', 'gigpress' ); ?></th>
 			    <td>
 			    	<?php gigpress_genre_checkboxes($artist_id); ?>
+			    	<a href="/2021site/wp-admin/edit-tags.php?taxonomy=genre&post_type=recordings" style="float:right;">edit genres</a>
 			    </td>
 			</tr>
 			<tr>
