@@ -95,7 +95,6 @@ function gigpress_prepare_show_fields($context = 'new') {
 	// Create a new related post
 	if($_POST['show_related'] == "new")
 	{
-
 		// Find the variables we need for token replacement
 		$artist = $wpdb->get_var(
 						$wpdb->prepare("SELECT artist_name FROM " . GIGPRESS_ARTISTS 
@@ -144,6 +143,9 @@ function gigpress_prepare_show_fields($context = 'new') {
 	{
 		$show['show_related'] = absint($_POST['show_related']);
 	}
+
+	$show['cast_id']   = gigpress_db_in($_POST['show_cast_id']);
+	$show['assist_id'] = gigpress_db_in($_POST['show_assist_id']);
 
 	if($context == 'new')
 	{
@@ -714,7 +716,7 @@ function gigpress_update_artist()
 		if($updateartist != FALSE) 
 			echo '<div id="message" class="updated fade"><p>' 
 				. wptexturize($artist['artist_name']) 
-				.' ' . __("successfully updated.", "gigpress"); 
+				.' ' . __("successfully updated.", "gigpress")
 				. '</p></div>';
 		elseif($updateartist === FALSE)
 			echo '<div id="message" class="error fade"><p>'
@@ -948,6 +950,8 @@ function gigpress_import() {
 									'show_artist_id' => $show['artist_id'],
 									'show_venue_id' => $show['venue_id'],
 									'show_tour_id' => $show['tour_id'],
+	                            'cast_id'   => $show['cast_id'],
+	                            'assist_id' => $show['assist_id'],
 									'show_ages' => gigpress_db_in(@$show['Admittance']),
 									'show_price' => gigpress_db_in(@$show['Price']),
 									'show_tix_url' => gigpress_db_in(@$show['Ticket URL'], FALSE),

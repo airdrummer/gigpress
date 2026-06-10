@@ -115,7 +115,7 @@ function gigpress_shows( $filter = null, $content = null )
 	}
 	// Validate year and date parameters
 	if ( $year || $month ) 
-	{	
+{	
 		$dateRange = ' of this year';
 		$thisYear = date('Y', current_time('timestamp'));
 		if($year) 
@@ -228,7 +228,7 @@ function gigpress_shows( $filter = null, $content = null )
 
 				include gigpress_template('shows-artist-heading');
 				include gigpress_template('shows-list-start');
-								
+											
 				foreach($shows as $show) // For each individual show
 				{
 					$showdata = gigpress_prepare($show, 'public');
@@ -237,7 +237,7 @@ function gigpress_shows( $filter = null, $content = null )
 						$current_tour = $showdata['tour'];
 						include gigpress_template('shows-tour-heading');
 					}
-					
+
 					$class = $showdata['status'];
 					++ $i; $class .= ($i % 2) ? '' : ' gigpress-alt';
 					if(!$showdata['tour'] && $current_tour) {
@@ -245,16 +245,16 @@ function gigpress_shows( $filter = null, $content = null )
 						$class .= ' gigpress-divider';
 					}
 					$class .= ($showdata['tour'] && !$tour) ? ' gigpress-tour' : '';
-					
+
 					include gigpress_template('shows-list');
-					
+
 					if($gpo['output_schema_json'] == 'y')
 					{
 						$show_markup = gigpress_json_ld($showdata);
 						array_push($shows_markup,$show_markup);
 					}
 				}
-				
+
 				include gigpress_template('shows-list-end');						
 			}
 		}
@@ -291,7 +291,7 @@ function gigpress_shows( $filter = null, $content = null )
 			 . " AND show_status != 'deleted' AND s.show_artist_id = a.artist_id AND s.show_venue_id = v.venue_id "  
 			 . " ORDER BY s.show_date " . $sort . ",s.show_expire " . $sort . ",s.show_time " . $sort
 			 . $limit);
-				
+
 		if($shows)
 		{
 			$current_tour = '';
@@ -483,7 +483,6 @@ function gigpress_menu( $options = null ) {
 	return ob_get_clean();
 }
 
-
 function gigpress_has_upcoming($filter = null)
 {
 	global $wpdb;
@@ -632,3 +631,5 @@ function gigpress_json_ld( $showdata ) {
 	 */
 	return apply_filters( 'gigpress_show_json_ld_markup', $show_markup, $showdata );
 }
+
+?>

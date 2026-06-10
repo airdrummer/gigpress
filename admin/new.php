@@ -494,6 +494,55 @@ function gigpress_add() {
 				</tbody>
 
 				<tbody>
+<?php
+    [$show_title, $selected_cast_id, $selected_assist_id] = get_gigpress_show_title_cast_ids($show_id);
+
+    $casts = get_posts([
+        'post_type'   => 'cast',
+        'posts_per_page' => -1,
+       	'orderby'     => 'title',
+        'order'       => 'ASC',
+        'post_status' => 'publish'
+    ]);
+?>
+    <tr>
+        <th scope="row">
+            <label for="show_cast_id"><?php _e( 'Assigned Cast:', 'custom-text-domain' ); ?></label>
+        </th>
+        <td>
+            <select name="show_cast_id" id="show_cast_id" class="postform">
+                <option value="0"><?php _e( '-- No Cast Assigned --', 'custom-text-domain' ); ?></option>
+                <?php foreach ( $casts as $cast )
+                {
+                    echo '<option value="' . $cast->ID . '" ' 
+                        . selected( $selected_cast_id, $cast->ID ) . ' >'
+                        . esc_html( $cast->post_title ) 
+                        . '</option>';
+                } ?>
+            </select>
+            <p class="description"><?php _e( 'Select a cast for this show.', 'custom-text-domain' ); ?></p>
+        </td>
+    </tr>
+
+    <tr>
+        <th scope="row">
+            <label for="show_assist_id"><?php _e( 'assisted by:', 'custom-text-domain' ); ?></label>
+        </th>
+        <td>
+            <select name="show_assist_id" id="show_assist_id" class="postform">
+                <option value="0"><?php _e( '-- No Cast Assigned --', 'custom-text-domain' ); ?></option>
+                <?php foreach ( $casts as $cast )
+                {
+                    echo '<option value="' . $cast->ID . '" ' 
+                        . selected( $selected_assist_id, $cast->ID ) . ' >'
+                        . esc_html( $cast->post_title ) 
+                        . '</option>';
+                } ?>
+            </select>
+            <p class="description"><?php _e( 'Select an assisted-by cast for this show.', 'custom-text-domain' ); ?></p>
+        </td>
+    </tr>
+    
 				<?php if(isset($_GET['gpaction']) && $_GET['gpaction'] == 'edit' || isset($result['editing'])) { ?>
 				<tr>
 					<th scope="row"><label for="show_status"><?php _e("Status", "gigpress") ?>:</label></th>
@@ -506,7 +555,8 @@ function gigpress_add() {
 					</td>
 				</tr>
 				<?php } ?>
-				  <tr>
+
+			    <tr>
 					<th scope="row"><label for="show_ages"><?php _e("Admittance", "gigpress") ?>:</label></th>
 					<td><select name="show_ages" id="show_ages">
 					  <option value="Not sure"<?php if(isset($show_ages) && $show_ages == "Not sure") echo(' selected="selected"'); ?>><?php _e("Not sure", "gigpress") ?></option>

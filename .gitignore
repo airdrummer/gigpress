@@ -1,2 +1,8 @@
 .svn
 tags
+.DS_Store
+output/error_log
+templates/.DS_Store
+templates/error_log
+templates/.DS_Store
+templates/.DS_Store

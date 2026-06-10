@@ -191,6 +191,9 @@ if ( $gpo['db_version'] < GIGPRESS_DB_VERSION ) {
 		case "1.7":
 			gigpress_db_upgrade_180();
 			break;
+		case "1.8":
+			gigpress_db_upgrade_190();
+			break;
 		default:
 			 error_log("===invalid gigpress.db_version: " . $gpo['db_version']);
 	}
@@ -356,6 +359,15 @@ function gigpress_db_upgrade_180() {
 	$artist_genres = $wpdb->get_results($sql);
 }
 
+function gigpress_db_upgrade_190()
+{
+	global $wpdb;
+	
+	// Add cast_id
+	$wpdb->get_results("ALTER TABLE " . GIGPRESS_SHOWS . " ADD COLUMN cast_id INT(11) DEFAULT 0");
+	$wpdb->get_results("ALTER TABLE " . GIGPRESS_SHOWS . " ADD COLUMN assist_id INT(11) DEFAULT 0");
+}
+
 function gigpress_uninstall() {
 
 	delete_option('gigpress_settings');
@@ -369,3 +381,5 @@ function gigpress_uninstall() {
 	 . GIGPRESS_ARTISTS);
 
 }
+
+?>

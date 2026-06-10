@@ -2,10 +2,15 @@
 //	bostoncamerata.org
 //--gigpress prog-list-end start
 
-	if( $atts['program_id'] or !empty($srchstrgs) || !empty($selected_genres))
+	if( $atts['program_id'] or $atts['genres'] 
+<<<<<<< HEAD
+	    or !empty($srchstrgs) || !empty($selected_genres))
+=======
+		or !empty($srchstrgs) || !empty($selected_genres))
+>>>>>>> parent of 76fad1f (v2.3.29.5)
 	{
 		echo "<style type='text/css'>.hero-image { display: none; } </style>";
-	 	echo "<h4><a class=floatright href='" . get_permalink() ."'>view all programs</a></h4>";
+	 	echo "<h4><a class=floatright href='" . get_permalink() . "'>view all programs</a></h4>";
 	}
 ?>
 

@@ -38,16 +38,19 @@ if($yr != $current_year) :
 						onclick="return showInfo('prog-note-<?php echo $showdata['id']; ?>')" >
 			<h2 class="progtitle" ><?php echo bc_bankhead($current_program); ?></h2></a>
 
-	<?php if(!empty($showdata['program_notes'])
-		  || !empty($showdata['program_genres'])) : ?>
+	<?php if (  !empty($showdata['program_notes'])
+		     || !empty($showdata['program_genres'])) : ?>
 		<div class="prog-note"
 			 <?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
 			 id="prog-note-<?php echo $showdata['id']; ?>"> <!-- start prog-note -->
 <?php 
 			echo $showdata['program_notes']; 
 			if (!empty($showdata['program_genres']))
-				echo '<div class="floatright prog-genres" style="margin-top:-1em;">' . $showdata['program_genres'] . '</div><br>'; 
-?>
+				echo '<div class="floatright prog-genres" style="margin-top:-1em;">'
+					 . $showdata['program_genres'] . '</div><br>'; 
+
+			?>
+				
 			<div class="prog-note-toggle">&nbsp;
 				<a title='click to hide program description'
 					href="#prog-<?php echo $showdata['id']; ?>"
@@ -57,6 +60,7 @@ if($yr != $current_year) :
 				<a title='open program description page'
 					href="/programs-repertoire/?program_id=<?php echo $showdata['artist_id']; ?>">
 			    <h3 class="gig-pup">program page</h3></a>
+				&nbsp;
 			</div><!-- prog-note-toggle shown in wptouch -->	
 <p>&nbsp;</p>
 		</div> <!-- end prog-note -->
@@ -133,6 +137,15 @@ if($yr != $current_year) :
 			echo "<h3>Sold Out!</h3>";
 	}
 ?> 
+<?php
+        if( $showdata['cast_id'] > 0 )
+        {
+			echo "<br><a class='info-right' title='display show cast'"
+				    . ' href="/about/company-collaborators/this-seasons-casts?show_id='
+				    . $showdata['id'] . '">'
+		            . '<h3 class="gig-pup" style="margin-right: 3em;">Cast</h3></a>';
+        } 
+?>
 	</div> 
 
 	<?php if(!empty($showdata['notes'])

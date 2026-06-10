@@ -300,3 +300,16 @@ abbr {
 	text-decoration: none;
 	font-size: 100%;
 }
+
+ /* seems to be ignored-\ */
+#gigpress_genre_checkboxes
+{
+	margin:0 !important;
+	padding:0 !important;
+	list-style:none !important;
+	text-align:left !important;
+}\
+#genre_filter summary
+{
+	margin-left: -1em;
+}

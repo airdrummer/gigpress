@@ -1,27 +1,27 @@
-<div class="filter-form gamma gig-pup">
+<div id=gp-artist-search-form class="filter-form gamma gig-pup">
 <details id="filter-form" >
-    <summary style="padding-top: 2px;" title="-- match titles/text ">search</summary>
+    <summary title="-- match titles/text ">search</summary>
 
  	<form method="post" class="gp-artist-search-form">
 	    <?php wp_nonce_field('gp_artist_search_action', 'gp_artist_search_nonce'); ?>
 	
-	    <input type="text" name="search" style="width:90%;"
+	    <input type="text" name="search" style="width:100%;"
 	           value="<?php echo wp_unslash(esc_attr($_POST['search'] ?? '')); ?>"
-	           placeholder='enclose "phrases in quotes"'>
-	
+	           placeholder='      enclose "phrase in quotes"'>
+	<br>
 	    <label>
 	        <input type="checkbox"
 	               name="search_note"
 	               value="1"
-	               <?php checked($_POST['search_note'] ?? '', '1'); ?>>
-	         also&nbsp;search&nbsp;description
+	               <?php checked($_POST['search_note'] ?? '', '1'); ?> >
+	         search&nbsp;description&nbsp;too
 	    </label>
 	<br>
 	    <select name="logic">
-	        <option value="OR" <?php selected($_POST['logic'] ?? '', 'OR'); ?>>
+	        <option value="OR" <?php selected($_POST['logic'] ?? '', 'OR'); ?> >
 	            Match ANY word or genre
 	        </option>
-	        <option value="AND" <?php selected($_POST['logic'] ?? '', 'AND'); ?>>
+	        <option value="AND" <?php selected($_POST['logic'] ?? '', 'AND'); ?> >
 	            Match ALL words and genres
 	        </option>
 	    </select>

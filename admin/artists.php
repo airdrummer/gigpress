@@ -58,7 +58,7 @@ function gigpress_artists()
 <?php
 		}
 	} 
-	else // new
+	else 
 	{
 		$artist = array();
 		$submit = '<span class="submit"><input type="submit" name="Submit" class="button-primary" value="' .  __("Add program", "gigpress") . '" /></span>'; ?>
@@ -99,8 +99,13 @@ function gigpress_artists()
 			</tr>
 			<tr valign="top">
 			    <th scope="row"><?php _e( 'Genres', 'gigpress' ); ?></th>
-			    <td>
+			    <td >
 			    	<?php gigpress_genre_checkboxes($artist_id); ?>
+<<<<<<< HEAD
+			    	<a href="https://bostoncamerata.org"/2021site/wp-admin/edit-tags.php?taxonomy=genre&post_type=recordings" style="float:right;">edit genres</a>
+=======
+			    	<a href="/2021site/wp-admin/edit-tags.php?taxonomy=genre&post_type=recordings" style="float:right;">edit genres</a>
+>>>>>>> parent of 76fad1f (v2.3.29.5)
 			    </td>
 			</tr>
 			<tr>

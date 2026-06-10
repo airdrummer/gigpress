@@ -3,7 +3,7 @@
  * Plugin Name: GigPress
  * Plugin URI:  https://evnt.is/1aca
  * Description: GigPress is a live performance listing and management plugin built for musicians and performers.
- * Version:     2.3.29.4
+ * Version:     2.3.29.5
  * Author:      The Events Calendar
  * Author URI:  https://evnt.is/1aor
  * Text Domain: gigpress
@@ -45,10 +45,10 @@ if ( ! defined( 'GIGPRESS_VENUES' ) )
 	define( 'GIGPRESS_VENUES', $wpdb->prefix . 'gigpress_venues' );
 
 if ( ! defined( 'GIGPRESS_VERSION' ) )
-	define( 'GIGPRESS_VERSION', '2.3.29.4' );
+	define( 'GIGPRESS_VERSION', '2.3.29.5' );
 
 if ( ! defined( 'GIGPRESS_DB_VERSION' ) )
-	define( 'GIGPRESS_DB_VERSION', '1.8' );
+	define( 'GIGPRESS_DB_VERSION', '1.9' );
 
 if ( ! defined( 'GIGPRESS_RSS' ) )
 	define( 'GIGPRESS_RSS', get_bloginfo( 'url' ) . '/?feed=gigpress' );
@@ -102,7 +102,9 @@ require( 'output/gigpress_sidebar.php' );
 require( 'output/feed.php' );
 require( 'output/ical.php' );
 
-require( 'lib/gigpress-genre.php' );
+require('lib/genre_utils.php' );
+require('lib/musician_utils.php');
+require('lib/cast_utils.php');
 
 function gigpress_admin_menu() {
 
@@ -178,7 +180,6 @@ function gigpress_js() {
 	}
 }
 
-
 function gigpress_head() {
 
 	global $gpo;
@@ -201,7 +202,6 @@ function gigpress_head() {
 ' );
 	}
 }
-
 
 function gigpress_template( $path ) {
 
@@ -372,8 +372,10 @@ $ical = __("Download iCal", "gigpress");
 
 $ical = '<img class="gi-cal" alt="'.$ical.'" title="'.$ical.'" src="' . plugins_url('images/ical-icon32.png', __FILE__) . '">';
 		$showdata['ical'] = '<a href="' . GIGPRESS_ICAL . '&amp;show_id=' . $show->show_id . '">' . $ical . '</a>';
-		$showdata['id'] = $show->show_id;
-		$showdata['iso_date'] = $show->show_date . "T" . $show->show_time;
+		$showdata['id']        = $show->show_id;
+		$showdata['cast_id']   = $show->cast_id;
+		$showdata['assist_id'] = $show->assist_id;
+		$showdata['iso_date']  = $show->show_date . "T" . $show->show_time;
 		$showdata['iso_end_date'] = $show->show_expire . "T" . $show->show_time;
 		$showdata['notes'] = wptexturize( do_shortcode( $show->show_notes ) );
 		$showdata['price'] = wptexturize( $show->show_price );

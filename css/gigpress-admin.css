@@ -10,7 +10,7 @@
 }
 
 #wpcontent .gigpress select {
-	max-width: 180px;
+	max-width: 100vw;
 }
 
 tr.gigpress-cancelled td, tr.gigpress-cancelled .gigpress-time {
