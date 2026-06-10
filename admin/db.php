@@ -47,6 +47,7 @@ artist_name VARCHAR(255) NOT NULL,
 artist_alpha VARCHAR(255) NOT NULL,
 artist_url VARCHAR(255),
 artist_order INTEGER(4) DEFAULT 0,
+program_notes TEXT,
 PRIMARY KEY  (artist_id)
 ) $charset_collate";
 
@@ -172,40 +173,30 @@ if ( $gpo['db_version'] < GIGPRESS_DB_VERSION ) {
 	require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 	dbDelta($gp_db);
 
-	switch($gpo['db_version']) {
+	switch($gpo['db_version']) 
+	{
 		case "1.0":
 			gigpress_db_upgrade_110();
-			gigpress_db_upgrade_120();
-			gigpress_db_upgrade_130();
-			gigpress_db_upgrade_140();
-			gigpress_db_upgrade_160();
-			break;
 		case "1.1":
 			gigpress_db_upgrade_120();
-			gigpress_db_upgrade_130();
-			gigpress_db_upgrade_140();
-			gigpress_db_upgrade_160();
-			break;
 		case "1.2":
 			gigpress_db_upgrade_130();
-			gigpress_db_upgrade_140();
-			gigpress_db_upgrade_160();
-			break;
 		case "1.3":
 			gigpress_db_upgrade_140();
-			gigpress_db_upgrade_160();
-			break;
 		case "1.4":
-			gigpress_db_upgrade_160();
-			break;
 		case "1.5":
 			gigpress_db_upgrade_160();
+		case "1.6":
+			gigpress_db_upgrade_170();
+		case "1.7":
+			gigpress_db_upgrade_180();
 			break;
+		default:
+			 error_log("===invalid gigpress.db_version: " . $gpo['db_version']);
 	}
 
 	$gpo['db_version'] = GIGPRESS_DB_VERSION;
 	update_option('gigpress_settings', $gpo);
-
 }
 
 
@@ -337,12 +328,41 @@ function gigpress_db_upgrade_160() {
 
 }
 
+function gigpress_db_upgrade_170() {
+	
+	global $wpdb;
+	
+	// Add alpha values for all existing artists
+	$artists = $wpdb->get_results(
+		"ALTER TABLE " . GIGPRESS_ARTISTS . " ADD program_notes TEXT"
+	);
+}
+
+function gigpress_db_upgrade_180() {
+	
+	global $wpdb;
+	$charset_collate = $wpdb->get_charset_collate();
+
+	$sql = "CREATE TABLE " . GIGPRESS_ARTIST_GENRE 
+	. " (
+		  artist_genre_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+		  artist_id bigint(20) unsigned NOT NULL,
+		  genre_id bigint(20) unsigned NOT NULL,
+		  PRIMARY KEY  (artist_genre_id),
+		  UNIQUE KEY artist_genre (artist_id,genre_id),
+		  KEY artist_id (artist_id),
+		  KEY genre_id (genre_id)
+		) $charset_collate;\n";	
+	$artist_genres = $wpdb->get_results($sql);
+}
+
 function gigpress_uninstall() {
 
 	delete_option('gigpress_settings');
 
 	global $wpdb;
 	$wpdb->query('DROP TABLE IF EXISTS . '
+	 . GIGPRESS_ARTIST_GENRE . ', '
 	 . GIGPRESS_SHOWS . ', '
 	 . GIGPRESS_TOURS . ', '
 	 . GIGPRESS_VENUES . ', '
