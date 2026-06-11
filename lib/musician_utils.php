@@ -5,7 +5,8 @@
 function mcpt_add_query_vars($qVars) //  shortcode atts are lowercase
 {
         $qVars[] = "show_id";
-        $qVars[] = 'noheadshot';
+        $qVars[] = 'revealheadshot';
+        $qVars[] = 'list_instruments';
         return $qVars;
 }
 add_filter('query_vars', 'mcpt_add_query_vars');
@@ -29,18 +30,22 @@ function bc_musician_list_shortcode( $atts, $content=null )
                 shortcode_atts( 
                     array(
                         'show_id'    => 0, // display musicians/instr in a show's cast 
-                        'noheadshot' => 0
+                        'revealheadshot' => false,
+                        'list_instruments' => false,
                     	),
                     $atts, 'musician_list' ));
-                    
+
+    if( (bool) ($atts['list_instruments'] ?? false))
+        return bc_instruments_list();
+
 	$show_id    = intval(strtolower(sanitize_text_field( $atts['show_id'] )));
-	$noheadshot = intval(strtolower(sanitize_text_field( $atts['noheadshot'] )));
+	$revealheadshot = (bool) ($atts['revealheadshot'] ?? false);
 	
-	return bc_musician_list( $show_id, $noheadshot, $content );
+	return bc_musician_list( $show_id, $revealheadshot, $content );
 }
 add_shortcode( 'musician_list', 'bc_musician_list_shortcode' );
 
-function bc_musician_list( $show_id, $noheadshot, $content ) 
+function bc_musician_list( $show_id, $revealheadshot, $content ) 
 {
     // Query args
     $args = array(
@@ -72,26 +77,26 @@ function bc_musician_list( $show_id, $noheadshot, $content )
 		}
 		
 		$args['post__in'] = array_keys($instruments);
-		generate_musician_list($args, $instruments, $noheadshot);
+		generate_musician_list($args, $instruments, $revealheadshot);
 
 		$title       = $assist_data[0];
 		$instruments = $assist_data[1];
 		if ( ! empty($instruments) )
 		{
-			echo "<h2 class=cast-title title='" .$title. "' >Assisted by:</h2>";
+			echo "<p title='" .$title. "' >Assisted by:</p>";
 			$args['post__in'] = array_keys($instruments);
-			generate_musician_list($args, $instruments, $noheadshot);
+			generate_musician_list($args, $instruments, $revealheadshot);
 		}
 	}
 	else
-		generate_musician_list($args, [], $noheadshot);
+		generate_musician_list($args, [], $revealheadshot);
 
     echo '</div>';
     
     return ob_get_clean();
 }
 
-function generate_musician_list($args, $instruments, $noheadshot)
+function generate_musician_list($args, $instruments, $revealheadshot)
 {
 	$query = new WP_Query( $args );
 	$musicians_array = $query->posts; 
@@ -100,16 +105,29 @@ function generate_musician_list($args, $instruments, $noheadshot)
 	{
 		$musician_id = $musician->ID;
 		echo '<div class="musician-entry'
-		                . ($noheadshot ? " noheadshot" : "")
+		                . ($revealheadshot ? " revealheadshot" : "")
     		            . '" id=musician-'. $musician_id . ' >';
 		$name = str_replace("&nbsp; ", "",
 						trim(get_field( 'first_name', $musician_id ) . ' ' .
 				     		 get_field( 'last_name',  $musician_id )));
 
-		echo '<details class="cast-member-row">';
+		echo '<details class="cast-member-row"'
+				        . ($revealheadshot ? "" : " open") . '>';
 		echo '<summary><div class="cast-header">';
 	    echo '<h2>' . esc_html($name) . '</h2>';
-        if ( ! $noheadshot && has_post_thumbnail($musician_id) )
+	    echo '<div class="instruments">';
+	    if ( empty($instruments) )
+	    {
+			echo strip_tags(
+					    get_the_term_list(
+					        $musician_id, 'instrument', '', ', ' , ''));
+ 		}
+ 		else
+			echo get_cast_instruments_string($instruments[$musician_id]);
+        echo '</div>';
+        echo '</div>';
+			
+        if ( ! $revealheadshot && has_post_thumbnail($musician_id) )
 			echo get_the_post_thumbnail(
 										$musician_id, 'thumbnail', 
 										array(
@@ -117,17 +135,17 @@ function generate_musician_list($args, $instruments, $noheadshot)
 											'title' => $name . ' headshot',
 											'alt'   => $name . ' headshot'
 										));
-	    echo '<div class="instruments">';
-	    if ( empty($instruments) )
-			echo strip_tags(
-					    get_the_term_list(
-					        $musician_id, 'instrument', '', ', ' , ''));
- 		else 
-			echo get_cast_instruments_string($instruments[$musician_id]);
-
-        echo '</div></div></summary>';
+        echo '</summary>';
 
         echo '<div class="bio details-content">' ;
+        if ( $revealheadshot && has_post_thumbnail($musician_id) )
+			echo get_the_post_thumbnail(
+										$musician_id, 'thumbnail', 
+										array(
+											'class' => 'headshot floatleft',
+											'title' => $name . ' headshot',
+											'alt'   => $name . ' headshot'
+										));
 		echo apply_filters( 'the_content', $musician->post_content );
 		echo '</div>';
 
@@ -174,4 +192,52 @@ add_action( 'admin_head', function () {
     }
 } );
 
+/**
+ * Display a flat list of all instruments sorted by your chosen numeric order.
+ *
+ * @return string HTML output of the flat list.
+ */
+function bc_instruments_list() 
+{
+	// 1. Fetch all terms inside the instrument taxonomy using the framework's order engine
+	$terms = get_terms( [
+		'taxonomy'   => 'instrument',
+		'hide_empty' => false, 
+		'orderby'    => 'order', // Instructs the order framework to handle sorting
+		'order'      => 'ASC'
+	] );
+
+	if ( is_wp_error( $terms ) || empty( $terms ) )
+		return '<p class="no-instruments">No instruments found.</p>';
+
+	// 2. Fail-safe fallback sort (In case frontend query filters are bypassed)
+	usort( $terms, function( $a, $b ) 
+	{
+		$order_a = (int) get_term_meta( $a->term_id, 'order', true );
+		$order_b = (int) get_term_meta( $b->term_id, 'order', true );
+		
+		if ( $order_a === $order_b )
+			return strcmp( $a->name, $b->name );
+		
+		return $order_a <=> $order_b;
+	} );
+
+	// 3. Render out the layout loop
+	$output = '<h2>instruments by display order</h2>';
+	$output .= '<ul class="flat-instruments-list">';
+	foreach ( $terms as $term ) 
+	{
+		$term_order = (int) get_term_meta( $term->term_id, 'order', true );
+		
+		$output .= sprintf(
+			'<li class="instrument-item item-%s" data-order="%d">%s</li>',
+			esc_attr( $term->slug ),
+			$term_order,
+			esc_html( $term->name )
+		);
+	}
+	$output .= '</ul>';
+
+	return $output;
+}
 ?>

@@ -247,13 +247,26 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 	
 	if (! $shows )
 	    echo "-- no casts set --";
-	else 
-	foreach($shows as $show)
+	else
 	{
-		echo "<h2><a href='/about/company-collaborators/this-seasons-casts/?show_id=" . $show->show_id . "'>";
-		echo show_title($show) . "</a></h2>";
+	    $previous_show = (object) ['artist_name' => '', 'cast_id' => 0];
+
+	    foreach($shows as $show)
+	    {
+	        if( $previous_show->artist_name == $show->artist_name) 
+	            $show->artist_name = '';
+
+	        echo "<h2" . (empty($show->artist_name) 
+	                   		? " class=same-prog" : "") . ">";
+	        echo "<a href='/about/company-collaborators/this-seasons-casts/?show_id=" . $show->show_id . "'>";
+	        echo show_title($show) . "</a></h2>";
+
+	        if( $show->artist_name == '')
+	            $show->artist_name = $previous_show->artist_name;
+
+	        $previous_show = $show;	
+		}
 	}
-	
 	echo "</div>";
 	return ob_get_clean();
 }
@@ -274,7 +287,7 @@ function get_gigpress_show_title_cast_ids( $show_id )
 						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
 							         . " WHERE s.show_id = %d",
 							        intval( $show_id )
-					    	) );
+					      ) );
     return [show_title($show), intval( $show->cast_id ), intval( $show->assist_id )];
 }
 
@@ -301,16 +314,20 @@ function get_gigpress_cast_data( $cast_id ): array
 
 function get_cast_instruments_string($instrument_ids)
 {
-	$assigned_instruments = [];
+	$instruments = [];
 	if ( ! empty( $instrument_ids ) ) 
 	{
 		foreach ( $instrument_ids as $term_id )
 		{
 			$term = get_term( $term_id, 'instrument' );
 			if ( $term && ! is_wp_error( $term ) )
-				$assigned_instruments[] = $term->name;
+			    if( $term->order )
+				    $instruments[$term->order] = $term->name;
+				else
+				    $instruments[] = $term->name;
 		}
-		return esc_html( implode( ', ', $assigned_instruments ) );
+		ksort($instruments, SORT_NUMERIC);
+		return esc_html( implode( ', ', $instruments ) );
 	}
 }
 ?>
