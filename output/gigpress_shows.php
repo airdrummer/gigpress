@@ -29,6 +29,7 @@ function gigpress_shows( $filter = null, $content = null )
 	extract( shortcode_atts( array(
 			'tour'            => false,
 			'artist'          => false,
+			'show_id' => FALSE,
 			'program_id' => FALSE,
 			'venue'           => false,
 			'limit'           => false,
@@ -54,7 +55,7 @@ function gigpress_shows( $filter = null, $content = null )
 
 	if(isset($_REQUEST['scope']))
 		$scope = sanitize_text_field($_REQUEST['scope']);
-		
+
 	// Date conditionals and sorting based on scope
 	switch($scope) 
 	{
@@ -78,94 +79,106 @@ function gigpress_shows( $filter = null, $content = null )
 	}
 	
 	// Query vars take precedence over function vars
-	if($artist)
+	if(isset($_REQUEST['show_id']))
+		$show_id = sanitize_text_field($_REQUEST['show_id']);
+	else if($artist)
 		$program_id = $artist;
-	if(isset($_REQUEST['artist_id']))
+	else if(isset($_REQUEST['artist_id']))
 		$program_id = sanitize_text_field($_REQUEST['artist_id']);
-	if(isset($_REQUEST['program_id']))
+	else if(isset($_REQUEST['program_id']))
 		$program_id = sanitize_text_field($_REQUEST['program_id']);
-		
+
 	$total_programs = ( $program_id
 					   ? 1
 					   : $wpdb->get_var("SELECT count(*) from " . GIGPRESS_ARTISTS));
-		
+
 	$and_atv_conditions = '';
-	// program, tour and venue filtering
-	if($program_id)
+	if($show_id) 
+	{ 
+		$and_atv_conditions = ' AND show_id = '  . $wpdb->prepare('%d', $show_id);
+		echo "<style type='text/css'>.hero-image { display: none; } </style>";
+		$group_artists = 'no';
+	}
+	else	// program, tour and venue filtering
 	{
-	    $and_atv_conditions .= ' AND show_artist_id = ' . $wpdb->prepare('%d', $program_id);
-	    echo "<style type='text/css'>.hero-image { display: none; } </style>";
-	}
-	if($tour)   $and_atv_conditions .= ' AND show_tour_id = '   . $wpdb->prepare('%d', $tour);
-	if($venue)  $and_atv_conditions .= ' AND show_venue_id = '  . $wpdb->prepare('%d', $venue);
-	
-	// Date filtering
-	// Query vars take precedence over function vars
-		
-	if(isset($_REQUEST['gpy']))
-	{ 
-		$year = sanitize_text_field($_REQUEST['gpy']);
-		$limit = '';
-		unset($month);
-	}
-	if(isset($_REQUEST['gpm']))
-	{ 
-		$month = sanitize_text_field($_REQUEST['gpm']);
-		$limit = '';
-	}
-	// Validate year and date parameters
-	if ( $year || $month ) 
-{	
-		$dateRange = ' of this year';
-		$thisYear = date('Y', current_time('timestamp'));
-		if($year) 
+		if($program_id)
 		{
-			if(is_numeric($year) && strlen($year) == 4) 
+		    $and_atv_conditions .= ' AND show_artist_id = ' . $wpdb->prepare('%d', $program_id);
+		    echo "<style type='text/css'>.hero-image { display: none; } </style>";
+		}
+		if($tour)
+			$and_atv_conditions .= ' AND show_tour_id = '   . $wpdb->prepare('%d', $tour);
+		if($venue)
+			$and_atv_conditions .= ' AND show_venue_id = '  . $wpdb->prepare('%d', $venue);
+
+		// Date filtering
+		// Query vars take precedence over function vars	
+		if(isset($_REQUEST['gpy']))
+		{ 
+			$year = sanitize_text_field($_REQUEST['gpy']);
+			$limit = '';
+			unset($month);
+		}
+		if(isset($_REQUEST['gpm']))
+		{ 
+			$month = sanitize_text_field($_REQUEST['gpm']);
+			$limit = '';
+		}
+		// Validate year and date parameters
+		if ( $year || $month ) 
+		{	
+			$dateRange = ' of this year';
+			$thisYear = date('Y', current_time('timestamp'));
+			if($year) 
 			{
-				if( $year != $thisYear)
-					$dateRange = ' in ' . $year;		
-			}
-			else 
+				if(is_numeric($year) && strlen($year) == 4) 
+				{
+					if( $year != $thisYear)
+						$dateRange = ' in ' . $year;		
+				}
+				else 
+					$year = $thisYear;
+			} 
+			else	// We've only specified a month, so we'll assume the year is current
 				$year = $thisYear;
-		} 
-		else	// We've only specified a month, so we'll assume the year is current
-			$year = $thisYear;
+	
+			$thisMonth = date('m', current_time('timestamp'));
+			if($month) {
+				if($month == 'current')
+					$month = $thisMonth;
+				elseif(round($month) == 0) 		// Probably using a month name
+					$month = date('m', strtotime($month));
+				elseif(round($month) < 13)		// Make sure the month is padded through 09
+					$month = str_pad($month, 2, 0, STR_PAD_LEFT);
+				else							// Bogus month value (not a string and > 12)
+					$month = FALSE;
+				$end_month = $month;
+			}
+			if(!$month) 
+			{
+				$month     = '01';
+				$end_month = '12';
+			}
+			$start = $year.'-'.$month.'-01';
+			$end   = date("Y-m-t", strtotime($year.'-'.$end_month.'-01'));
+			$date_condition = 'show_date BETWEEN ' . $wpdb->prepare('%s', $start)
+						 	 . ' AND ' . $wpdb->prepare('%s', $end);
+			if($month == $end_month)
+				$dateRange = (($month == $thisMonth) and  ($year == $thisYear))
+								? ' this month'
+								: ' in ' . date('F', strtotime($end)) . ' of ' . $year;
+			$scope = 'dateRange';
+		}
 
-		$thisMonth = date('m', current_time('timestamp'));
-		if($month) {
-			if($month == 'current')
-				$month = $thisMonth;
-			elseif(round($month) == 0) 		// Probably using a month name
-				$month = date('m', strtotime($month));
-			elseif(round($month) < 13)		// Make sure the month is padded through 09
-				$month = str_pad($month, 2, 0, STR_PAD_LEFT);
-			else							// Bogus month value (not a string and > 12)
-				$month = FALSE;
-			$end_month = $month;
-		}
-		if(!$month) 
-		{
-			$month     = '01';
-			$end_month = '12';
-		}
-		$start = $year.'-'.$month.'-01';
-		$end   = date("Y-m-t", strtotime($year.'-'.$end_month.'-01'));
-		$date_condition = 'show_date BETWEEN ' . $wpdb->prepare('%s', $start)
-					 	 . ' AND ' . $wpdb->prepare('%s', $end);
-		if($month == $end_month)
-			$dateRange = (($month == $thisMonth) and  ($year == $thisYear))
-							? ' this month'
-							: ' in ' . date('F', strtotime($end)) . ' of ' . $year;
-		$scope = 'dateRange';
+		$limit = (!empty($limit)) ? ' LIMIT ' . $wpdb->prepare('%d', $limit) : '';
+		$artist_order = ($artist_order == 'custom') ?  "artist_order ASC, " : '';
 	}
 
-	$limit = (!empty($limit)) ? ' LIMIT ' . $wpdb->prepare('%d', $limit) : '';
-	$artist_order = ($artist_order == 'custom') ?  "artist_order ASC, " : '';
-	
 	ob_start();
 
 	// Are we showing our menu?
-	if ( $show_menu ) {
+	if ( $show_menu ) 
+	{
 		$menu_options = array();
 		$menu_options['scope'] = $scope;
 		$menu_options['type'] = $show_menu;
@@ -207,9 +220,9 @@ function gigpress_shows( $filter = null, $content = null )
 			    . " ORDER BY s.show_date " . $sort . ",s.show_expire " . $sort . ",s.show_time ". $sort
 			     . $limit);
 			
-			if($shows) {
+			if($shows) 
+			{
 				// For each program group
-				
 				$some_results = TRUE;
 				$current_tour = '';
 				$i = 0;
@@ -258,7 +271,7 @@ function gigpress_shows( $filter = null, $content = null )
 				include gigpress_template('shows-list-end');						
 			}
 		}
-				
+	
 		if ( $some_results ) 
 		{
 			// After all program groups
@@ -284,8 +297,8 @@ function gigpress_shows( $filter = null, $content = null )
 	}
 	else // Not grouping by programs or showing program or only 1 program
 	{
-		$shows = $wpdb->get_results("
-			SELECT * FROM " . GIGPRESS_ARTISTS . " AS a, " . GIGPRESS_VENUES . " as v, "
+		$shows = $wpdb->get_results(
+			"SELECT * FROM " . GIGPRESS_ARTISTS . " AS a, " . GIGPRESS_VENUES . " as v, "
 			 . GIGPRESS_SHOWS ." AS s LEFT JOIN  " . GIGPRESS_TOURS 
 			 . " AS t ON s.show_tour_id = t.tour_id WHERE " . $date_condition . $and_atv_conditions
 			 . " AND show_status != 'deleted' AND s.show_artist_id = a.artist_id AND s.show_venue_id = v.venue_id "  
@@ -314,7 +327,8 @@ function gigpress_shows( $filter = null, $content = null )
 				
 				$class = $showdata['status'];
 				++ $i; $class .= ($i % 2) ? '' : ' gigpress-alt';
-				if(!$showdata['tour'] && $current_tour) {
+				if(!$showdata['tour'] && $current_tour) 
+				{
 					$current_tour = '';
 					$class .= ' gigpress-divider';
 				}
@@ -333,8 +347,9 @@ function gigpress_shows( $filter = null, $content = null )
 			include gigpress_template( 'shows-list-footer' );
 
 			output_shows_markup_json($shows_markup);
-			
-		} else {
+		}	
+		else 
+		{
 			// No shows to display
 			include gigpress_template('shows-list-empty');
 		}	
@@ -426,10 +441,12 @@ function gigpress_menu( $options = null ) {
 		
 	$and_atv_conditions = '';	// program, tour and venue filtering
 	if($program_id) 
-				$and_atv_conditions .= ' AND show_artist_id = ' . $wpdb->prepare('%d', $program_id);
-	if($tour)   $and_atv_conditions .= ' AND show_tour_id = '   . $wpdb->prepare('%d', $tour);
-	if($venue)  $and_atv_conditions .= ' AND show_venue_id = '  . $wpdb->prepare('%d', $venue);	
-	
+			$and_atv_conditions .= ' AND show_artist_id = ' . $wpdb->prepare('%d', $program_id);
+	if($tour)
+			$and_atv_conditions .= ' AND show_tour_id = '   . $wpdb->prepare('%d', $tour);
+	if($venue)
+			$and_atv_conditions .= ' AND show_venue_id = '  . $wpdb->prepare('%d', $venue);
+
 	// Variable operajigamarations based on monthly vs. yearly
 	switch ( $type ) 
 	{
