@@ -1,4 +1,4 @@
-<?php
+1`<?php
 /**
  * 1. REGISTER THE "CASTS" CUSTOM POST TYPE
  */
@@ -247,45 +247,54 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
     $atts = mcpt_query_atts( // url query params
                 shortcode_atts( 
                     array(
-                        'show_id'    => 0 // display musicians/instr in a show's cast 
+                        'show_id' => 0, // display musicians/instr in a show's cast 
+                        'past'    => false, // display past casts (in mcpt_add_query_vars)
                     	),
                     $atts, 'cast_list' ));
     $show_id = intval(sanitize_text_field( $atts['show_id'] ));
     if ($show_id > 0)
     	return bc_musician_list($show_id, 1, $content);
 
+    $past = (bool) $atts['past'];
+
     global $wpdb;
     // Query the show details along with its corresponding artist and venue
     $shows = $wpdb->get_results( 
     			$wpdb->prepare(
-			        "SELECT s.show_id, s.cast_id, s.assist_id, s.show_date, a.artist_name, v.venue_name
+			        "SELECT s.show_id, s.cast_id, s.assist_id, s.show_date, a.artist_id, a.artist_name, v.venue_name
 				         FROM " . GIGPRESS_SHOWS . " AS s"
 					         . " LEFT JOIN " . GIGPRESS_ARTISTS . " AS a ON s.show_artist_id = a.artist_id"
 						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
-							       . " WHERE s.show_expire >= '" . GIGPRESS_NOW . "'"
-									 . " AND s.show_status != 'deleted'"
-								       . " AND s.cast_id > 0" 
+                                    . " WHERE s.show_status != 'deleted' AND s.cast_id > 0"
+                                        . " AND s.show_expire " . ($past ? "<" : ">=") . " '" . GIGPRESS_NOW . "'"
 							.' ORDER BY s.show_date ASC;'
 						    	) );
     ob_start();
     echo $content;
-	echo "<div class=upcoming-casts>";
+	echo "<div class=" . ($past ? "past" : "upcoming") . "-casts>";
 	
 	if (! $shows )
-	    echo "-- no casts set --";
+	    echo "-- no casts found --";
 	else
 	{
-	    $previous_show = (object) ['artist_name' => '', 'cast_id' => 0];
+	    $previous_show = (object) ['artist_name' => '']; // initial for compare
 
 	    foreach($shows as $show)
 	    {
 	        if( $previous_show->artist_name == $show->artist_name) 
 	            $show->artist_name = '';
 
-	        echo "<h2" . (empty($show->artist_name) 
-	                   		? " class=same-prog" : "") . ">";
-	        echo "<a href='/about/company-collaborators/this-seasons-casts/?show_id=" . $show->show_id . "'>";
-	        echo show_title($show) . "</a></h2>";
+            echo "<h2 class=" . (empty($show->artist_name) 
+                                ? "same-prog" : "next-prog")
+                            . ">";
+		        echo "<a href='/about/company-collaborators/"
+        	            . ($scope == 'past'
+                            ? "this-seasons-casts" 
+                            : 'past-seasons-casts')
+                        . "/?show_id=" . $show->show_id
+                        . "&program_id=" . $show->artist_id . "'>";
+                    echo show_title($show);
+            echo "</a></h2>";
 
 	        if( $show->artist_name == '')
 	            $show->artist_name = $previous_show->artist_name;
@@ -301,29 +310,29 @@ add_shortcode( 'upcoming_casts', 'bc_list_upcoming_casts_shortcode' );
 function get_gigpress_show_title_cast_ids( $show_id ) 
 {
 	if( ! $show_id )
-    	return ['', 0, 0];
+    	return ['', 0, 0, 0];
 
     global $wpdb;
     // Query the show details along with its corresponding artist and venue
     $show = $wpdb->get_row( 
     			$wpdb->prepare(
-			        "SELECT s.show_date, s.cast_id, s.assist_id, a.artist_name, v.venue_name
+			        "SELECT s.show_date, s.cast_id, s.assist_id, a.artist_id, a.artist_name, v.venue_name
 				         FROM " . GIGPRESS_SHOWS . " AS s"
 					         . " LEFT JOIN " . GIGPRESS_ARTISTS . " AS a ON s.show_artist_id = a.artist_id"
 						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
 							         . " WHERE s.show_id = %d",
 							        intval( $show_id )
 					      ) );
-    return [show_title($show), intval( $show->cast_id ), intval( $show->assist_id )];
+    return [show_title($show), intval( $show->artist_id ), intval( $show->cast_id ), intval( $show->assist_id )];
 }
 
 function get_gigpress_show_cast_data( $show_id ): array
 {
-	[$show_title, $cast_id, $assist_id] = get_gigpress_show_title_cast_ids($show_id);
+	[$show_title, $program_id, $cast_id, $assist_id] = get_gigpress_show_title_cast_ids($show_id);
 	$cast_data   = get_gigpress_cast_data( $cast_id );
 	$assist_data = get_gigpress_cast_data( $assist_id );
 
-	return [$show_title, $cast_data, $assist_data];
+	return [$show_title, $program_id, $cast_data, $assist_data];
 }
 
 function get_gigpress_cast_data( $cast_id ): array
@@ -340,13 +349,13 @@ function get_gigpress_cast_data( $cast_id ): array
 
 function get_cast_instruments_string( $musician_instruments )
 {
-	if ( empty( $musician_instruments ) || ! is_array( $musician_instruments ) ) {
+	if ( empty( $musician_instruments ) 
+	   || ! is_array( $musician_instruments ) ) 
 		return '';
-	}
-	
+
 	// Sort associative instruments array by custom saved order weights
 	asort( $musician_instruments, SORT_NUMERIC );
-	
+
 	$instruments = [];
 	foreach ( array_keys( $musician_instruments ) as $term_id )
 	{
@@ -365,9 +374,8 @@ function bc_enforce_relational_integrity_constraints( $post_id )
 {
 	// GUARDRAIL 1: Explicitly sanitize and verify we have a valid positive post ID
 	$post_id = intval( $post_id );
-	if ( $post_id <= 0 ) {
+	if ( $post_id <= 0 ) 
 		return;
-	}
 
 	$post_type = get_post_type( $post_id );
 

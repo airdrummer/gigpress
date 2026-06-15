@@ -1,745 +1,310 @@
 <?php
-/**
- * 1. REGISTER THE "CASTS" CUSTOM POST TYPE
- */
-function register_casts_custom_post_type() {
-    $labels = [
-        "name"               => esc_html__( "Casts", "custom-text-domain" ),
-        "singular_name"      => esc_html__( "Cast", "custom-text-domain" ),
-        "menu_name"          => esc_html__( "Casts", "custom-text-domain" ),
-        "all_items"          => esc_html__( "All Casts", "custom-text-domain" ),
-        "add_new"            => esc_html__( "Add New Cast", "custom-text-domain" ),
-        "add_new_item"       => esc_html__( "Add New Cast", "custom-text-domain" ),
-        "edit_item"          => esc_html__( "Edit Cast", "custom-text-domain" ),
-        "new_item"           => esc_html__( "New Cast", "custom-text-domain" ),
-        "view_item"          => esc_html__( "View Cast", "custom-text-domain" ),
-        "search_items"       => esc_html__( "Search Casts", "custom-text-domain" ),
-        "not_found"          => esc_html__( "No Casts found", "custom-text-domain" ),
-        "not_found_in_trash" => esc_html__( "No Casts found in trash", "custom-text-domain" ),
-    ];
 
-    $args = [
-        "label"               => esc_html__( "Casts", "custom-text-domain" ),
-        "labels"              => $labels,
-        "public"              => false, // Kept internal/admin-facing by default
-        "show_ui"             => true,
-        "show_in_menu"        => true,
-        "capability_type"     => "post",
-        "hierarchical"        => false,
-        "rewrite"             => [ "slug" => "cast", "with_front" => true ],
-        "query_var"           => true,
-        "supports"            => [ "title" ],
-        "show_in_rest"        => false,
-    ];
+// musician cpt utils
 
-    register_post_type( "cast", $args );
-}
-add_action( 'init', 'register_casts_custom_post_type' );
-
-/**
- * 2. CAST CONFIGURATION META BOX (Musicians + Subsets of Instruments with Custom Orders)
- */
-function render_cast_meta_box_callback( $post ) 
+function mcpt_add_query_vars($qVars) //  shortcode atts are lowercase
 {
-	wp_nonce_field( 'save_cast_meta_action', 'cast_meta_box_nonce' );
-
-	// Fetch the updated structured cast meta array
-	$saved_cast_data = get_post_meta( $post->ID, '_cast_data', true ) ?: [];
-	$saved_musicians = array_keys( $saved_cast_data );
-
-	$musicians = get_posts([
-		'post_type'      => 'musician',
-		'post_status'    => 'publish',
-		'orderby'        => 'title',
-		'order'          => 'ASC',
-		'posts_per_page' => -1
-	]);
-
-	echo '<div class="cast-meta-box-container">';
-	if ( ! empty( $musicians ) ) 
-	{
-		foreach ( $musicians as $musician ) 
-		{
-			$terms = wp_get_object_terms( $musician->ID, 'instrument' );
-			$musician_meta = isset( $saved_cast_data[ $musician->ID ] ) ? $saved_cast_data[ $musician->ID ] : [];
-			$musician_order = isset( $musician_meta['musician_order'] ) ? intval( $musician_meta['musician_order'] ) : 0;
-			$saved_inst_weights = isset( $musician_meta['instruments'] ) ? $musician_meta['instruments'] : [];
-			
-			echo '<div class="musician-cast-row" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">';
-				
-				// Master Musician Checkbox + Order Input
-				$musician_checked = in_array( $musician->ID, $saved_musicians ) ? 'checked' : '';
-				echo '<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 8px;">';
-					echo '<label style="font-weight: bold; cursor: pointer;">';
-						echo '<input type="checkbox" name="cast_musicians[]" class="musician-toggle" value="' . $musician->ID . '" ' . $musician_checked . '> ';
-						echo esc_html( $musician->post_title );
-					echo '</label>';
-					echo '<label style="font-size: 12px; color: #666;">Musician Display Order: ';
-						echo '<input type="number" name="cast_musician_order[' . $musician->ID . ']" value="' . $musician_order . '" style="width: 60px; padding: 2px 4px; height: 24px; text-align: center;">';
-					echo '</label>';
-				echo '</div>';
-
-				// Sub-list of Instruments + Individual Order Weights
-				if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) 
-				{
-					echo '<div class="instruments-sub-list" style="margin-left: 25px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">';
-					foreach ( $terms as $term ) 
-					{
-						$inst_checked = isset( $saved_inst_weights[ $term->term_id ] ) ? 'checked' : '';
-						$inst_order = isset( $saved_inst_weights[ $term->term_id ] ) ? intval( $saved_inst_weights[ $term->term_id ] ) : 0;
-						
-						echo '<div style="display: flex; align-items: center; justify-content: space-between; background: #fafafa; padding: 4px 8px; border: 1px solid #e2e8f0; border-radius: 3px;">';
-							echo '<label style="font-size: 12px; color: #555; cursor: pointer; flex-grow: 1; display: inline-block;">';
-								echo '<input type="checkbox" name="cast_instruments[' . $musician->ID . '][]" class="instrument-toggle" value="' . $term->term_id . '" ' . $inst_checked . '> ';
-								echo esc_html( $term->name );
-							echo '</label>';
-							echo '<input type="number" name="cast_instrument_order[' . $musician->ID . '][' . $term->term_id . ']" value="' . $inst_order . '" placeholder="0" style="width: 45px; font-size: 11px; padding: 1px 3px; height: 20px; text-align: center;">';
-						echo '</div>';
-					}
-					echo '</div>';
-				}
-			echo '</div>';
-		}
-	}
-	echo '</div>';
-
-	add_action( 'admin_print_footer_scripts', 'inject_cast_meta_box_auto_toggle_js' );
+        $qVars[] = "show_id";
+        $qVars[] = 'revealheadshot';
+        $qVars[] = 'list_instruments';
+        $qVars[] = 'past';
+        return $qVars;
 }
-/**
- * Register the Custom Cast Meta Box.
- */
-function register_cast_meta_box() {
-	add_meta_box(
-		'cast_meta_box_id',                  // Unique ID for the meta box container HTML
-		__( 'Cast Members & Instruments', 'text-domain' ), // Visible Title of the meta box
-		'render_cast_meta_box_callback',     // CRITICAL: The exact name of your callback function
-		'cast',                              // CRITICAL: Must match the exact CPT slug of your Casts post type
-		'normal',                            // Context: where it appears ('normal', 'side', 'advanced')
-		'high'                               // Priority: how high up the page it loads
-	);
-}
-// Hook the registration execution loop into the WordPress backend admin pool
-add_action( 'add_meta_boxes', 'register_cast_meta_box' );
+add_filter('query_vars', 'mcpt_add_query_vars');
 
-/**
- * Inject jQuery automation handlers cleanly into the WordPress admin footer pool.
- */
-function inject_cast_meta_box_auto_toggle_js() 
+function mcpt_query_atts( $atts ) // query params override shortcode atts
 {
-	// Verify we are working on the proper screen context matrix
-	$screen = get_current_screen();
-	if ( ! $screen || $screen->post_type !== 'cast' ) {
-		return;
-	}
-	?>
-	<script id=cast_meta_box_auto_toggle_js type="text/javascript">
-		jQuery(document).ready(function($) {
-			
-			// 1. DIRECTION A: Selecting instruments selects/unselects the musician row automatically
-			$('.cast-meta-box-container').on('change', '.instrument-toggle', function() {
-				var $row = $(this).closest('.musician-cast-row');
-				var $musicianCheckbox = $row.find('.musician-toggle');
-				
-				// Count how many instruments are currently checked inside this specific row context
-				var checkedInstrumentsCount = $row.find('.instrument-toggle:checked').length;
-				
-				if (checkedInstrumentsCount > 0) {
-					// If at least one instrument is selected, ensure the parent musician stays checked
-					$musicianCheckbox.prop('checked', true);
-				} else {
-					// If all instruments are cleared out, completely uncheck the parent musician
-					$musicianCheckbox.prop('checked', false);
-				}
-			});
-
-			// 2. DIRECTION B: (UX Safeguard) If manually unchecking a musician, clear all their sub-selections
-			$('.cast-meta-box-container').on('change', '.musician-toggle', function() {
-				var $row = $(this).closest('.musician-cast-row');
-				
-				// If a content administrator turns off a musician entirely, clear down all sub-toggles
-				if (!this.checked) {
-					$row.find('.instrument-toggle').prop('checked', false);
-				}
-			});
-			
-		});
-	</script>
-<?php
+    global $wp_query;
+    $atts = (array)$atts;
+    $out  = array();
+    foreach($atts as $name => $default) 
+    {
+        $qv = $wp_query->query_vars[$name];
+        $out[$name] = ( !empty($qv) ? $qv : $default );
+    }
+    return $out;
 }
 
-function save_cast_meta_data_handler( $post_id ) 
-{
-	if ( ! isset( $_POST['cast_meta_box_nonce'] ) 
-	  || ! wp_verify_nonce( $_POST['cast_meta_box_nonce'], 'save_cast_meta_action' ) ) 
-		return;
-
-	if ( defined( 'DOING_AUTOSAVE' ) && DOING_AUTOSAVE ) 
-		return;
-
-	if ( ! current_user_can( 'edit_post', $post_id ) ) 
-		return;
-
-	$clean_cast_data = [];
-
-	// Parse custom post matrices based on active primary checkboxes
-	if ( isset( $_POST['cast_musicians'] ) && is_array( $_POST['cast_musicians'] ) ) 
-	{
-		foreach ( $_POST['cast_musicians'] as $musician_id ) 
-		{
-			$m_id = intval( $musician_id );
-			$m_order = isset( $_POST['cast_musician_order'][ $m_id ] ) ? intval( $_POST['cast_musician_order'][ $m_id ] ) : 0;
-			
-			$m_instruments = [];
-			if ( isset( $_POST['cast_instruments'][ $m_id ] ) && is_array( $_POST['cast_instruments'][ $m_id ] ) ) 
-			{
-				foreach ( $_POST['cast_instruments'][ $m_id ] as $term_id ) 
-				{
-					$t_id = intval( $term_id );
-					$t_order = isset( $_POST['cast_instrument_order'][ $m_id ][ $t_id ] ) ? intval( $_POST['cast_instrument_order'][ $m_id ][ $t_id ] ) : 0;
-					$m_instruments[ $t_id ] = $t_order;
-				}
-				// Pre-sort internal instruments by context order weight
-				asort( $m_instruments, SORT_NUMERIC );
-			}
-
-			$clean_cast_data[ $m_id ] = [
-				'musician_order' => $m_order,
-				'instruments'    => $m_instruments
-			];
-		}
-
-		// Sort structural musician parent nodes by their weight values
-		uasort( $clean_cast_data, function( $a, $b ) {
-			return $a['musician_order'] <=> $b['musician_order'];
-		});
-	}
-
-	if ( ! empty( $clean_cast_data ) ) 
-		update_post_meta( $post_id, '_cast_data', $clean_cast_data );
-	else
-		delete_post_meta( $post_id, '_cast_data' );
-}
-add_action( 'save_post_cast', 'save_cast_meta_data_handler' );
-
-/**
- * Generate a human-readable title for a GigPress show from its ID.
- *
- * @param int $show_id The GigPress show ID.
- * @return string The constructed show title (e.g., "Artist Name @ Venue Name (June 4, 2026)").
- */
-function show_title($show)
-{
-	    // Assemble the parts into a clean display title
-    // Format the date using your WordPress site's local date configuration
-    $formatted_date = date_i18n( get_option( 'date_format' ), strtotime( $show->show_date ) );
-    return sprintf(
-        '<span class=show-title>%s</span>'
-        . ' <span class=show-venue>%s</span>'
-        . ' <span class=show-date>%s</span>',
-        $show->artist_name,
-        $show->venue_name,
-        $formatted_date
-    );
-}
-
-function bc_list_upcoming_casts_shortcode( $atts, $content=null ) 
+function bc_musician_list_shortcode( $atts, $content=null ) 
 {
     $atts = mcpt_query_atts( // url query params
                 shortcode_atts( 
                     array(
-                        'show_id'    => 0 // display musicians/instr in a show's cast 
+                        'show_id'    => 0, // display musicians/instr in a show's cast 
+                        'revealheadshot' => false,
+                        'list_instruments' => false,
                     	),
-                    $atts, 'cast_list' ));
-    $show_id = intval(sanitize_text_field( $atts['show_id'] ));
-    if ($show_id > 0)
-    	return bc_musician_list($show_id, 1, $content);
+                    $atts, 'musician_list' ));
 
-    global $wpdb;
-    // Query the show details along with its corresponding artist and venue
-    $shows = $wpdb->get_results( 
-    			$wpdb->prepare(
-			        "SELECT s.show_id, s.cast_id, s.assist_id, s.show_date, a.artist_name, v.venue_name
-				         FROM " . GIGPRESS_SHOWS . " AS s"
-					         . " LEFT JOIN " . GIGPRESS_ARTISTS . " AS a ON s.show_artist_id = a.artist_id"
-						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
-							       . " WHERE s.show_expire >= '" . GIGPRESS_NOW . "'"
-									 . " AND s.show_status != 'deleted'"
-								       . " AND s.cast_id > 0" 
-							.' ORDER BY s.show_date ASC;'
-						    	) );
+    if( (bool) ($atts['list_instruments'] ?? false))
+        return bc_instruments_list();
+
+	$show_id    = intval(strtolower(sanitize_text_field( $atts['show_id'] )));
+	$revealheadshot = (bool) ($atts['revealheadshot'] ?? false);
+	
+	return bc_musician_list( $show_id, $revealheadshot, $content );
+}
+add_shortcode( 'musician_list', 'bc_musician_list_shortcode' );
+
+function bc_musician_list( $show_id, $revealheadshot, $content ) 
+{
+    $args = array(
+        'post_type'      => 'musician',
+        'post_status'    => 'publish',
+        'posts_per_page' => -1
+    );
+
     ob_start();
+
     echo $content;
-	echo "<div class=upcoming-casts>";
-	
-	if (! $shows )
-	    echo "-- no casts set --";
-	else
+    echo '<div class=musician-list>';
+
+	if ( $show_id > 0 )
 	{
-	    $previous_show = (object) ['artist_name' => '', 'cast_id' => 0];
+		[$show_title, $program_id, $cast_data, $assist_data] = get_gigpress_show_cast_data($show_id);
 
-	    foreach($shows as $show)
-	    {
-	        if( $previous_show->artist_name == $show->artist_name) 
-	            $show->artist_name = '';
+		$cast_title  = $cast_data[0];
+		$instruments = $cast_data[1]; // Holds the ordered multidimensional meta mapping matrix
 
-	        echo "<h2" . (empty($show->artist_name) 
-	                   		? " class=same-prog" : "") . ">";
-	        echo "<a href='/about/company-collaborators/this-seasons-casts/?show_id=" . $show->show_id . "'>";
-	        echo show_title($show) . "</a></h2>";
+		echo "<h2 class='cast-title' id='show-" . $show_id . "' title='". $cast_title . "'>" 
+		        . '<a href=/performances/?condensed=1';
+	    	                    echo "&program_id=" . $program_id;
+	    	                    echo "&show_id="    . $show_id;
+	    	                    echo '#prog-note-'  . $show_id
+	    	                . '>';
+		                echo $show_title;
+		echo "</a></h2><hr>";
 
-	        if( $show->artist_name == '')
-	            $show->artist_name = $previous_show->artist_name;
-
-	        $previous_show = $show;	
+		if ( empty($instruments) )
+		{
+		    echo "<h3>-- no cast assigned --</h3>";
+            return ob_get_clean();
 		}
-	}
-	echo "</div>";
-	return ob_get_clean();
-}
-add_shortcode( 'upcoming_casts', 'bc_list_upcoming_casts_shortcode' );
-
-function get_gigpress_show_title_cast_ids( $show_id ) 
-{
-	if( ! $show_id )
-    	return ['', 0, 0];
-
-    global $wpdb;
-    // Query the show details along with its corresponding artist and venue
-    $show = $wpdb->get_row( 
-    			$wpdb->prepare(
-			        "SELECT s.show_date, s.cast_id, s.assist_id, a.artist_name, v.venue_name
-				         FROM " . GIGPRESS_SHOWS . " AS s"
-					         . " LEFT JOIN " . GIGPRESS_ARTISTS . " AS a ON s.show_artist_id = a.artist_id"
-						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
-							         . " WHERE s.show_id = %d",
-							        intval( $show_id )
-					      ) );
-    return [show_title($show), intval( $show->cast_id ), intval( $show->assist_id )];
-}
-
-function get_gigpress_show_cast_data( $show_id ): array
-{
-	[$show_title, $cast_id, $assist_id] = get_gigpress_show_title_cast_ids($show_id);
-	$cast_data   = get_gigpress_cast_data( $cast_id );
-	$assist_data = get_gigpress_cast_data( $assist_id );
-
-	return [$show_title, $cast_data, $assist_data];
-}
-
-function get_gigpress_cast_data( $cast_id ): array
-{
-	if ($cast_id > 0) 
-	{
-	    $cast_title   = get_the_title($cast_id);
-	    $instruments  = get_post_meta($cast_id, '_cast_data', true);
-
-      	return [$cast_title, $instruments];
-	}
-	return ['', [] ];
-}
-
-function get_cast_instruments_string( $musician_instruments )
-{
-	if ( empty( $musician_instruments ) || ! is_array( $musician_instruments ) ) {
-		return '';
-	}
-	
-	// Sort associative instruments array by custom saved order weights
-	asort( $musician_instruments, SORT_NUMERIC );
-	
-	$instruments = [];
-	foreach ( array_keys( $musician_instruments ) as $term_id )
-	{
-		$term = get_term( $term_id, 'instrument' );
-		if ( $term && ! is_wp_error( $term ) ) {
-			$instruments[] = $term->name;
-		}
-	}
-	return esc_html( implode( ', ', $instruments ) );
-}
-
-/**
- * Enforce cascading data integrity across custom post types and internal relational tables. 
- */
-function bc_enforce_relational_integrity_constraints( $post_id ) 
-{
-	$post_type = get_post_type( $post_id );
-
-	// CONSTRAINT A: Prevent deletion of a Musician if they are assigned to a Cast
-	if ( $post_type === 'musician' ) 
-	{
-		global $wpdb;
-		$casts_meta = $wpdb->get_results( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_cast_data'" );
 		
-		foreach ( $casts_meta as $meta ) 
+		// CRITICAL: Force WordPress to output elements in array key order
+		$args['post__in'] = array_keys($instruments);
+		$args['orderby']  = 'post__in';
+		generate_musician_list($args, $instruments, $revealheadshot);
+
+		$cast_title  = $assist_data[0];
+		$instruments = $assist_data[1];
+		if ( ! empty($instruments) )
 		{
-			$cast_data = maybe_unserialize( $meta->meta_value );
-			if ( is_array( $cast_data ) && array_key_exists( $post_id, $cast_data ) ) 
-			{
-				$cast_title = get_the_title( $meta->post_id );
-				wp_die( sprintf(
-					__( '<h3>Deletion Blocked</h3>'
-						. '<p>The musician <strong>%s</strong> cannot be deleted because they are  assigned to the Cast '
-						. '<strong><a href="%s" target="_blank">%s</a></strong>.</p>'
-						. '<p>Please edit that Cast and uncheck this performer before deleting them.</p>', 'custom-text-domain' ),
-					esc_html( get_the_title( $post_id ) ),
-					esc_url( get_edit_post_link( $meta->post_id ) ),
-					esc_html( $cast_title )
-				), '', [ 'back_link' => true ] );
-			}
+			echo "<p title='" . $cast_title. "' >Assisted by:</p>";
+			$args['post__in'] = array_keys($instruments);
+			$args['orderby']  = 'post__in';
+			generate_musician_list($args, $instruments, $revealheadshot);
 		}
 	}
-	// CONSTRAINT B: Prevent deletion of a Cast post if linked to a GigPress Show configuration
-	else if ( $post_type === 'cast' ) 
-	{
-		global $wpdb;
-		if ( defined( 'GIGPRESS_SHOWS' ) ) 
-		{
-			// Query the custom engine to check both primary and assistant relation columns
-			$linked_show_id = $wpdb->get_var( 
-									$wpdb->prepare(
-										"SELECT show_id FROM " . GIGPRESS_SHOWS 
-										. " WHERE cast_id = %d OR assist_id = %d LIMIT 1",
-										intval( $post_id ),
-										intval( $post_id )
-									) );
-			if ( $linked_show_id ) 
-			{
-				wp_die( sprintf(
-					__( '<h3>Deletion Blocked</h3>'
-						. '<p>The Cast <strong>%s</strong> cannot be removed because it is assigned to <a target=_blank href=/2021site/wp-admin/admin.php?page=gigpress&gpaction=edit&show_id=%d>Show #%d</a>.</p>'
-						. '<p>Please remove that show cast assignment to allow cast deletion.</p>', 'custom-text-domain' ),
-					esc_html( get_the_title( $post_id ) ),
-					intval( $linked_show_id ),
-					intval( $linked_show_id )
-				), '', [ 'back_link' => true ] );
-			}
-		}
-	}
-}
-add_action( 'wp_trash_post', 'bc_enforce_relational_integrity_constraints', 10, 1 );
-add_action( 'before_delete_post', 'bc_enforce_relational_integrity_constraints', 10, 1 );
-
-/**
- * 1. REGISTER THE IMPORT SUBMENU UNDER CASTS
- */
-add_action( 'admin_menu', 'bc_register_cast_import_submenu' );
-function bc_register_cast_import_submenu() 
-{
-	add_submenu_page(
-		'edit.php?post_type=cast',
-		__( 'Import Cast from CSV', 'custom-text-domain' ),
-		__( 'Import Cast', 'custom-text-domain' ),
-		'manage_options',
-		'cast-csv-import',
-		'bc_render_cast_import_page'
-	);
-}
-
-/**
- * 2. RENDER AND PROCESS THE IMPORT UTILITY
- */
-function bc_render_cast_import_page() 
-{
-	if ( ! current_user_can( 'manage_options' ) )
-		wp_die( __( 'You do not have sufficient permissions to access this page.', 'custom-text-domain' ) );
-
-	$action           = isset( $_POST['import_action'] ) 
-							? sanitize_text_field( $_POST['import_action'] ) : '';
-	$show_upload_form = true;
-	$notice_message   = '';
-	$notice_type      = 'success';
-
-	// STEP A: INITIAL FILE UPLOAD & PARSING
-	if ( $action === 'upload_csv' ) 
-	{
-		check_admin_referer( 'bc_cast_csv_upload_action', 'bc_import_nonce' );
-
-		if ( ! empty( $_FILES['cast_csv']['tmp_name'] ) ) 
-		{
-			$file = $_FILES['cast_csv']['tmp_name'];
-			if ( ( $handle = fopen( $file, 'r' ) ) !== false ) 
-			{
-				$row_index      = 0;
-				$cast_title     = '';
-				$musicians_data = [];
-
-				while ( ( $row = fgetcsv( $handle, 1000, ',' ) ) !== false ) 
-				{
-					if ( $row_index === 0 ) 
-					{
-						// Line 1 is the Cast Title
-						$cast_title = isset( $row[0] ) ? trim( sanitize_text_field( $row[0] ) ) : '';
-					} 
-					else 
-					{
-						if ( empty( $row ) || empty( $row[0] ) ) 
-							continue;
-
-						$musicians_data[] = array_map( 'trim', $row );
-					}
-					$row_index++;
-				}
-				fclose( $handle );
-
-				if ( empty( $cast_title ) ) 
-				{
-					$notice_message = __( 'Error: The CSV file is missing a Cast title on the first line.', 'custom-text-domain' );
-					$notice_type    = 'error';
-				} 
-				else 
-				{
-					// Check if a Cast with this exact title already exists
-					$existing_cast = new WP_Query([
-							'post_type'      => 'cast',
-							'title'          => $cast_title,
-							'posts_per_page' => 1,
-							'post_status'    => 'any',
-							'no_found_rows'  => true,
-						]);
-
-					if ( $existing_cast->have_posts() ) 
-					{
-						// STOP: Prompt user for replacement permission
-						$show_upload_form = false;
-						?>
-						<div class="wrap">
-							<h1><?php _e( 'Cast Already Exists', 'custom-text-domain' ); ?></h1>
-							<div class="notice notice-warning is-dismissible">
-								<p><?php echo sprintf( __( 'A performance Cast titled <strong>"%s"</strong> already exists in the database.', 'custom-text-domain' ), esc_html( $cast_title ) ); ?></p>
-							</div>
-							<p><?php _e( 'Would you like to overwrite this existing Cast with the incoming list?', 'custom-text-domain' ); ?></p>
-							
-							<form method="post" action="">
-								<?php wp_nonce_field( 'bc_cast_csv_execute_action', 'bc_import_nonce' ); ?>
-								<input type="hidden" name="import_action" value="execute_import">
-								<input type="hidden" name="cast_title" value="<?php echo esc_attr( $cast_title ); ?>">
-								<input type="hidden" name="serialized_musicians" value="<?php echo esc_attr( json_encode( $musicians_data ) ); ?>">
-								
-								<?php submit_button( __( 'Yes, Replace Existing Cast Data', 'custom-text-domain' ), 'primary', 'submit_overwrite', false ); ?>
-								<a href="<?php echo admin_url( 'edit.php?post_type=cast&page=cast-csv-import' ); ?>" class="button button-secondary"><?php _e( 'No, Cancel Import', 'custom-text-domain' ); ?></a>
-							</form>
-						</div>
-						<?php
-						return;
-					} 
-					else 
-					{
-						// No naming collision found -> Execute straight away
-						$notice_message   = bc_execute_cast_csv_import( $cast_title, $musicians_data );
-						$show_upload_form = true;
-					}
-				}
-			} 
-			else 
-			{
-				$notice_message = __( 'Error: Failed to open the uploaded CSV file stream.', 'custom-text-domain' );
-				$notice_type    = 'error';
-			}
-		} 
-		else 
-		{
-			$notice_message = __( 'Error: Please select a valid CSV file to upload.', 'custom-text-domain' );
-			$notice_type    = 'error';
-		}
-	}
-
-	// STEP B: CONFIRMED OVERWRITE EXECUTION
-	if ( $action === 'execute_import' ) 
-	{
-		check_admin_referer( 'bc_cast_csv_execute_action', 'bc_import_nonce' );
-
-		$cast_title     = isset( $_POST['cast_title'] ) ? sanitize_text_field( $_POST['cast_title'] ) : '';
-		$musicians_json = isset( $_POST['serialized_musicians'] ) ? wp_unslash( $_POST['serialized_musicians'] ) : '[]';
-		$musicians_data = json_decode( $musicians_json, true );
-
-		if ( ! empty( $cast_title ) && is_array( $musicians_data ) ) 
-		{
-			$notice_message = bc_execute_cast_csv_import( $cast_title, $musicians_data, true );
-		} 
-		else 
-		{
-			$notice_message = __( 'Error: Corrupted processing payload detected during conversion pass.', 'custom-text-domain' );
-			$notice_type    = 'error';
-		}
-	}
-
-	// DISPLAY DEFAULT UPLOAD INTERFACE
-	if ( $show_upload_form ) 
-	{
-		?>
-		<div class="wrap">
-			<h1><?php _e( 'Import Cast Roster', 'custom-text-domain' ); ?></h1>
-			
-			<?php if ( ! empty( $notice_message ) ) : ?>
-				<div class="notice notice-<?php echo esc_attr( $notice_type ); ?> is-dismissible">
-					<p><?php echo $notice_message; ?></p>
-				</div>
-			<?php endif; ?>
-
-			<div class="card" style="max-width: 600px; margin-top: 20px;">
-				<h2><?php _e( 'Upload CSV Roster File', 'custom-text-domain' ); ?></h2>
-				<p class="description">
-					<?php _e( 'The CSV format requires 1st line to contain the <strong>Cast Title</strong>. Subsequent rows must be structured as: <code>Muician First Name, Last Name, Instrument 1, Instrument 2, ...</code>', 'custom-text-domain' ); ?><br>
-					<?php _e( 'If the cast exists, you will be prompted to overwrite.', 'custom-text-domain' ); ?><br>
-					<?php _e( "Musicians and Instruments will be will be added in the order given,", 'custom-text-domain' ); ?>
-					<?php _e( "and will be created if they don't exist.", 'custom-text-domain' ); ?>
-				</p>
-				<hr>
-				<form method="post" action="" enctype="multipart/form-data">
-					<?php wp_nonce_field( 'bc_cast_csv_upload_action', 'bc_import_nonce' ); ?>
-					<input type="hidden" name="import_action" value="upload_csv">
-					
-					<p>
-						<label Welfare for="cast_csv"><strong><?php _e( 'Choose CSV File:', 'custom-text-domain' ); ?></strong></label><br><br>
-						<input type="file" name="cast_csv" id="cast_csv" accept=".csv" required>
-					</p>
-					
-					<?php submit_button( __( 'Process and Parse Cast File', 'custom-text-domain' ), 'primary' ); ?>
-				</form>
-			</div>
-		</div>
-		<?php
-	}
-}
-
-/**
- * 3. CORE LOGIC ENGINE TO DATABASE ENTRIES
- */
-function bc_execute_cast_csv_import( $cast_title, $musicians_data, $overwrite = false ) 
-{
-	$cast_id = 0;
-	// Resolve or spawn target Cast Post object
-	if ( $overwrite ) 
-	{
-		$existing_cast = new WP_Query(
-								[
-									'post_type'      => 'cast',
-									'title'          => $cast_title,
-									'posts_per_page' => 1,
-									'post_status'    => 'any',
-									'no_found_rows'  => true,
-								]);
-		if ( $existing_cast->have_posts() )
-			$cast_id = $existing_cast->posts[0]->ID;
-	}
-
-	if ( empty( $cast_id ) ) 
-		$cast_id = wp_insert_post([
-							'post_title'  => $cast_title,
-							'post_type'   => 'cast',
-							'post_status' => 'publish',
-							]);
-
-	if ( is_wp_error( $cast_id ) || ! $cast_id )
-		return sprintf( __( 'Critical Failure: Unable to establish an initialization target for Cast "%s".', 'custom-text-domain' ), esc_html( $cast_title ) );
-
-	$clean_cast_data    = [];
-	$musician_order     = 0;
-	$musicians_created  = 0;
-	$instruments_create = 0;
-
-	// Loop through rows: subsequent lines containing musicians, instruments
-	foreach ( $musicians_data as $row ) 
-	{
-		if ( count( $row ) < 2 ) 
-			continue;
-
-		$first_name = trim(sanitize_text_field( $row[0] ));
-		$last_name  = trim(sanitize_text_field( $row[1] ));
-		if ( empty( $first_name ) && empty( $last_name ) ) 
-			continue;
-
-		// Calculate standardized title pattern managed by your custom title generator
-		$compiled_musician_title = str_replace( ", &nbsp;", "", "$last_name, $first_name" );
-
-		// Check if Musician exists, create if missing
-		$musician_query = new WP_Query(
-									[
-										'post_type'      => 'musician',
-										'title'          => $compiled_musician_title,
-										'posts_per_page' => 1,
-										'post_status'    => 'any',
-										'no_found_rows'  => true,
-									]);
-
-		if ( $musician_query->have_posts() ) 
-			$musician_id = $musician_query->posts[0]->ID;
-		else 
-		{
-			$musician_id = wp_insert_post(
-									[
-										'post_title'  => $compiled_musician_title,
-										'post_type'   => 'musician',
-										'post_status' => 'publish',
-									]);
-
-			// Populate custom fields safely, supporting ACF integrations
-			if ( ! is_wp_error( $musician_id ) ) 
-			{
-				update_post_meta( $musician_id, 'first_name', $first_name );
-				update_post_meta( $musician_id, 'last_name', $last_name );
-				++$musicians_created;
-			}
-		}
-
-		if ( is_wp_error( $musician_id ) || ! $musician_id )
-			continue;
-
-		// Extract custom instruments parameters (columns index 2 and onward)
-		$instruments_input   = array_slice( $row, 2 );
-		$assigned_instrument = [];
-		$instrument_order    = 0;
-		$core_taxonomy_terms = [];
-
-		foreach ( $instruments_input as $instrument_name ) 
-		{
-			$instrument_name = sanitize_text_field( trim( $instrument_name ) );
-			if ( empty( $instrument_name ) ) 
-				continue;
-
-			// Check if taxonomy term exists, create if missing
-			$term = term_exists( $instrument_name, 'instrument' );
-			if ( ! $term )
-			{
-				$term = wp_insert_term( $instrument_name, 'instrument' );
-				++$instruments_created;
-			}
-
-			if ( ! is_wp_error( $term ) && isset( $term['term_id'] ) ) 
-			{
-				$term_id = intval( $term['term_id'] );
-				$assigned_instrument[ $term_id ] = $instrument_order;
-				$core_taxonomy_terms[]           = $term_id;
-				$instrument_order               += 10;
-			}
-		}
-
-		// Sync Core Taxonomy associations to Musician profile target
-		if ( ! empty( $core_taxonomy_terms ) ) 
-			wp_set_object_terms( $musician_id, $core_taxonomy_terms, 'instrument', true );
-
-		// Append matrix settings into relational meta array
-		$clean_cast_data[ $musician_id ] = [
-								'musician_order' => $musician_order,
-								'instruments'    => $assigned_instrument,
-								];
-		$musician_order += 10;
-	}
-
-	// Update the relational multi-dimensional ordering
-	if ( ! empty( $clean_cast_data ) ) 
-	{
-		update_post_meta( $cast_id, '_cast_data', $clean_cast_data );
-		return sprintf( __( '<strong>Success:</strong> Cast "<strong>%s</strong>" has %d musician entries.', 'custom-text-domain' ), esc_html( $cast_title ), count( $clean_cast_data ) )
-		            . sprintf( __( ' %d musicians created.', 'custom-text-domain' ), $musicians_created )
-		                . sprintf( __( ' %d instruments created.', 'custom-text-domain' ), $instruments_created );
-	} 
 	else
 	{
-		delete_post_meta( $cast_id, '_cast_data' );
-		return __( '<strong>Notice:</strong> Target cast updated, but no valid musician profiles could be extracted from input lines.', 'custom-text-domain' );
+		// Fall back to alpha sort if executing a blind loop without an assigned Cast ID context
+		$args['orderby'] = 'title';
+		$args['order']   = 'ASC';
+		generate_musician_list($args, [], $revealheadshot);
 	}
+
+    echo '</div>';
+    
+    return ob_get_clean();
 }
+
+function generate_musician_list($args, $instruments, $revealheadshot)
+{
+	$query = new WP_Query( $args );
+	$musicians_array = $query->posts; 
+
+	foreach ( $musicians_array as $musician ) 
+	{
+		$musician_id = $musician->ID;
+		echo '<div class="musician-entry' 
+					. ($revealheadshot ? " revealheadshot" : "")
+					 . '" id=musician-'. $musician_id . ' >';
+		
+		$name = str_replace("&nbsp; ", "", 
+							trim(get_field( 'first_name', $musician_id ) . ' ' 
+								. get_field( 'last_name',  $musician_id )));
+
+		echo '<details class="cast-member-row"' . ($revealheadshot ? "" : " open") . '>';
+		echo '<summary><div class="cast-header">';
+	    echo '<h2>' . esc_html($name) . '</h2>';
+	    echo '<div class="instruments">';
+	    
+	    if ( empty($instruments) )
+	    {
+			echo strip_tags( // remove links
+					get_the_term_list( // alphabetical order
+						$musician_id, 'instrument', '', ', ' , ''));
+ 		}
+ 		else
+		{
+			// Extract just the nested instruments in order for this particular row item
+			$musician_cast_meta   = isset($instruments[$musician_id]) 
+										? $instruments[$musician_id] : [];
+			$musician_instruments = isset($musician_cast_meta['instruments']) 
+										? $musician_cast_meta['instruments'] : [];
+			echo get_cast_instruments_string($musician_instruments);
+		}
+        echo '</div>';
+        echo '</div>';
+        echo '</summary>';
+        echo '<div class="bio details-content">' ;
+        
+        if ( has_post_thumbnail($musician_id) )
+			echo get_the_post_thumbnail($musician_id, 'thumbnail', array(
+				'class' => 'headshot floatleft',
+				'title' => $name . ' headshot',
+				'alt'   => $name . ' headshot'
+			));
+		else
+			echo '<img src="/2021site/wp-content/uploads/2026/06/Headshot-Silhouette-Default-150x150.jpeg" alt="Headshot Silhouette Default" class="headshot floatleft" />';
+			
+		echo apply_filters( 'the_content', $musician->post_content );
+		
+		echo '<br clear=left></div>';
+        echo '</details></div>';
+        if ( ! $revealheadshot)
+            echo '<hr>';
+    }    
+    wp_reset_postdata();
+}
+
+/**
+ * Auto-generate the Musician post title from ACF First Name + Last Name fields.
+ */
+add_action( 'acf/save_post', 'mcpt_set_title_from_name', 20 );
+function mcpt_set_title_from_name( $musician_id ) 
+{
+    // Only run on the musician post type
+    if ( get_post_type( $musician_id ) !== 'musician' )
+        return;
+
+    $first = trim( get_field( 'first_name', $musician_id ) );
+    $last  = trim( get_field( 'last_name',  $musician_id ) );
+
+    if ( ! $first && ! $last ) 
+        return;
+
+    $full_name = str_replace(", &nbsp;", "", trim( "$last, $first" ));
+
+    // Avoid an infinite loop by unhooking before updating
+    remove_action( 'acf/save_post', 'mcpt_set_title_from_name', 20 );
+
+    wp_update_post( [
+        'ID'         => $musician_id,
+        'post_title' => $full_name,
+        'post_name'  => sanitize_title( $full_name ), // updates the slug too
+    ] );
+
+    add_action( 'acf/save_post', 'mcpt_set_title_from_name', 20 );
+}
+
+// Hide the native title field on musician edit screens
+add_action( 'admin_head', function () {
+    global $post;
+    if ( $post && get_post_type( $post ) === 'musician' ) {
+        echo '<style>#titlediv { display: none; }</style>';
+    }
+} );
+
+/**
+ * Display a flat list of all instruments sorted by your chosen numeric order.
+ *
+ * @return string HTML output of the flat list.
+ */
+function bc_instruments_list() 
+{
+	// 1. Fetch all terms inside the instrument taxonomy using the framework's order engine
+	$terms = get_terms( [
+		'taxonomy'   => 'instrument',
+		'hide_empty' => false, 
+		'orderby'    => 'order', // Instructs the order framework to handle sorting
+		'order'      => 'ASC'
+	] );
+
+	if ( is_wp_error( $terms ) || empty( $terms ) )
+		return '<p class="no-instruments">No instruments found.</p>';
+
+	// 2. Fail-safe fallback sort (In case frontend query filters are bypassed)
+	usort( $terms, function( $a, $b ) 
+	{
+		$order_a = (int) get_term_meta( $a->term_id, 'order', true );
+		$order_b = (int) get_term_meta( $b->term_id, 'order', true );
+		
+		if ( $order_a === $order_b )
+			return strcmp( $a->name, $b->name );
+		
+		return $order_a <=> $order_b;
+	} );
+
+	// 3. Render out the layout loop
+	$output = '<h2>instruments by display order</h2>';
+	$output .= '<ul class="flat-instruments-list">';
+	foreach ( $terms as $term ) 
+	{
+		$term_order = (int) get_term_meta( $term->term_id, 'order', true );
+		
+		$output .= sprintf(
+			'<li class="instrument-item item-%s" data-order="%d">%s</li>',
+			esc_attr( $term->slug ),
+			$term_order,
+			esc_html( $term->name )
+		);
+	}
+	$output .= '</ul>';
+
+	return $output;
+}
+/**
+ * Intercept and block the deletion of an Instrument term if it is actively linked 
+ * to a musician profile or embedded inside a Cast's metadata assigned_instruments. 
+ */
+function bc_prevent_active_instrument_deletion( $term_id, $taxonomy ) 
+{
+	if ( $taxonomy !== 'instrument' )
+		return $term_id;
+
+	// 1. Check if the instrument is actively assigned to any musician posts via core taxonomy relations
+	$assigned_musicians = get_objects_in_term( $term_id, 'instrument' );
+	if ( ! empty( $assigned_musicians ) && ! is_wp_error( $assigned_musicians ) ) 
+	{
+		return new WP_Error(
+			'instrument_in_use_by_musician',
+			__( '<strong>Deletion Blocked:</strong> This instrument is assigned to one or more musicians.', 'custom-text-domain' )
+		);
+	}
+
+	// 2. Check if the instrument is stored inside any Cast meta arrays
+	global $wpdb;
+	$all_casts_meta = $wpdb->get_col( "SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_cast_data'" );
+	
+	if ( ! empty( $all_casts_meta ) ) 
+	{
+		foreach ( $all_casts_meta as $meta_value ) 
+		{
+			$cast_data = maybe_unserialize( $meta_value );
+			if ( is_array( $cast_data ) ) 
+			{
+				foreach ( $cast_data as $musician_id => $assigned_instruments ) 
+				{
+					if ( isset( $assigned_instruments['instruments'] ) 
+						&& is_array( $assigned_instruments['instruments'] ) ) 
+					{
+						if ( array_key_exists( $term_id, $assigned_instruments['instruments'] ) ) 
+						{
+							return new WP_Error(
+								'instrument_in_use_by_cast',
+								__( '<strong>Deletion Blocked:</strong> This instrument is assigned to a musician in a cast.', 'custom-text-domain' )
+							);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return $term_id;
+}
+add_filter( 'pre_delete_term', 'bc_prevent_active_instrument_deletion', 10, 2 );
 
 ?>

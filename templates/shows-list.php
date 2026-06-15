@@ -51,16 +51,10 @@ if($yr != $current_year) :
 
 			?>
 				
-			<div class="prog-note-toggle">&nbsp;
-				<a title='click to hide program description'
-					href="#prog-<?php echo $showdata['id']; ?>"
-					onclick="return showInfo('prog-note-<?php echo $showdata['id']; ?>')" >
-			    <h3 class="gig-pup">hide</h3></a> 
-				&nbsp;
+			<div class="prog-note-toggle">
 				<a title='open program description page'
 					href="/programs-repertoire/?program_id=<?php echo $showdata['artist_id']; ?>">
 			    <h3 class="gig-pup">program page</h3></a>
-				&nbsp;
 			</div><!-- prog-note-toggle shown in wptouch -->	
 <p>&nbsp;</p>
 		</div> <!-- end prog-note -->
@@ -152,7 +146,7 @@ if($yr != $current_year) :
 		  or !empty($showdata['artist_url'])) : ?>
 		<br clear=both> <!-- start gig-note -->
 		<div class="gig-note" 
-		<?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
+		<?php echo ( 1 < $condensed ?  "style='display:none;'" : ""); ?>
 		        id="gignote-<?php echo $showdata['id']; ?>" >
 			<?php if(!empty($showdata['notes'])) echo $showdata['notes']; ?>
 			<?php if(!empty($showdata['artist_url'])) : ?>

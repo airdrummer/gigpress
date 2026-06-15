@@ -1,4 +1,5 @@
-	<hr clear=left style="margin-top:2em;"> 	<!-- end prog-list -->
+<!-- begin gigpress prog-list -->
+	<hr clear=left style="margin-top:2em;">
 <?php
 	echo '<div class="gigpress-artist" id="program-' . $showdata['artist_id']
 		     . '"><h2 class=progtitle><a href="/programs-repertoire/?program_id='
@@ -22,10 +23,11 @@
 			echo "<div class='floatright prog-genres'>" . $showdata['genres'] . "</div><br style='clear:both;'>";
 
 		echo '<div class="more-info info-right">';	
-		echo 	'<a href="/performances/?program_id='
-				  . $showdata['artist_id'] . '"><h3 class=gig-pup>Upcoming&nbsp;Performances</h3></a> '
-				  . '&nbsp;&nbsp;&nbsp; <a href="/performances/past-performances/?program_id='
-				  . $showdata['artist_id'] . '"><h3 class=gig-pup>Past&nbsp;Performances</h3></a>';
+		echo    '<a href="/performances/?condensed=1&program_id=' . $showdata['artist_id'] 
+				  . '"><h3 class=gig-pup>Upcoming&nbsp;Performances</h3></a> '
+				  . '&nbsp;&nbsp;&nbsp;'
+			 .  '<a href="/performances/past-performances/?condensed=1&program_id=' . $showdata['artist_id'] 
+				  . '"><h3 class=gig-pup>Past&nbsp;Performances</h3></a>';
 
     		if(!empty($gpo['display_subscriptions']))
     		{
@@ -42,4 +44,5 @@
 		echo '</div>';
 ?>
 <br clear=both>
-	</div><!-- end prog-list -->
+	</div>
+<!-- end gigpress prog-list -->

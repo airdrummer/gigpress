@@ -1,3 +1,4 @@
+<!-- begin gigpress prog-list-start -->
 <?php
 
 	if ($atts['genres']) // shortcode or query arg
@@ -11,10 +12,7 @@
 			foreach($programs as $program) 
 				if (in_array($program->artist_id, $excluded_ids))
 						--$n;
-<<<<<<< HEAD
-=======
 
->>>>>>> parent of 76fad1f (v2.3.29.5)
 		echo "<h4 class=search-results>" 
 		    . ($n   ? $n . " program" . ($n >1 ? "s" : '')
 			       	: "no programs")
@@ -24,3 +22,4 @@
 	 	echo '<button style="float:right;" onclick="openSearch(\'genre\');">search again</button>';
 	}
 ?>
+<!-- end gigpress prog-list-start -->

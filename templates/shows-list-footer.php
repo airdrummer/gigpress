@@ -1,21 +1,36 @@
+<!--begin gigpress show list footer -->
 <?php	
 // This template is displayed at the very end of our shows listing.
 // By default, it displays links to RSS and iCal feeds for all upcoming shows,
 // or, if we're filtering for a specific program_id or tour, just for that specific program_id or tour
 
-?>
-<!--gigpress list footer -->
-<?php	if( $program_id )
+    if( $program_id )
+	{
+		echo "<div class='viewall ctr'>view this program's ";
+		if ($program_id && $show_id) 
 		{
-				echo "<div class=viewall><a href='/performances/";
-				if ($scope == 'past')
-	 				echo "past-performances/'>view all past";
-				else
-	 				echo "'>view all upcoming";
-				echo " shows</a></div><br>&nbsp";
+		    echo "<a href='/about/company-collaborators/"
+    	        . ($scope == 'past'
+    	            ? "this-seasons-casts" 
+    	            : 'past-seasons-casts')
+		        . "/?program_id=" . $program_id . "'>"
+		        . "past casts</a>" ;
 		}
-?>
-<?php if(!empty($gpo['display_subscriptions'])) : ?>
+
+		if ( ($program_id && $show_id) || ($scope !== 'past'))
+    	    echo " <a href='/performances/past-performances/"
+    	            . "?program_id=" . $program_id . "'>"
+    	            . " past shows</a>";
+    
+		if ( ($program_id && $show_id) || ($scope == 'past'))
+    	    echo " <a href='/performances/"
+    	            . "?program_id=" . $program_id . "'>"
+    	            . " upcoming shows</a>";
+
+		echo "</div><br>&nbsp";
+	}
+
+    if(!empty($gpo['display_subscriptions'])) : ?>
 	<p class="gigpress-subscribe"><?php _e("Subscribe", "gigpress"); ?>: 
 	
 	<?php if(!$program_id && !$tour && !$venue) : ?>
@@ -36,3 +51,4 @@
 		<br><hr>
 	</div>				
 <?php endif; ?>
+<!--end gigpress show list footer -->
