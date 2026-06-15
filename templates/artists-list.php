@@ -1,4 +1,4 @@
-<!-- begin gigpress prog-list -->
+<!-- begin prog-list -->
 	<hr clear=left style="margin-top:2em;">
 <?php
 	echo '<div class="gigpress-artist" id="program-' . $showdata['artist_id']
@@ -45,4 +45,4 @@
 ?>
 <br clear=both>
 	</div>
-<!-- end gigpress prog-list -->
+<!-- end prog-list -->

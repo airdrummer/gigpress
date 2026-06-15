@@ -6,26 +6,37 @@
 
     if( $program_id )
 	{
-		echo "<div class='viewall ctr'>view this program's ";
+		echo "<div class='viewall ctr'>";
 		if ($program_id && $show_id) 
 		{
 		    echo "<a href='/about/company-collaborators/"
     	        . ($scope == 'past'
     	            ? "this-seasons-casts" 
     	            : 'past-seasons-casts')
-		        . "/?program_id=" . $program_id . "'>"
-		        . "past casts</a>" ;
+		        . "/?program_id=" . $program_id . "'"
+                . " title='view past casts of this program'"
+                . "   alt='view past casts of this program'"
+                . "' >"
+		            . "<button>past casts</button></a>" ;
 		}
 
 		if ( ($program_id && $show_id) || ($scope !== 'past'))
     	    echo " <a href='/performances/past-performances/"
-    	            . "?program_id=" . $program_id . "'>"
-    	            . " past shows</a>";
+    	            . "?program_id=" . $program_id 
+    	            . "&condensed=2" . "'" 
+                . " title='view past shows of this program'"
+                . "   alt='view past shows of this program'"
+                ."' >"
+		            . "<button>past shows</button></a>" ;
     
 		if ( ($program_id && $show_id) || ($scope == 'past'))
     	    echo " <a href='/performances/"
-    	            . "?program_id=" . $program_id . "'>"
-    	            . " upcoming shows</a>";
+    	            . "?program_id=" . $program_id 
+    	            . "&condensed=1" . "'" 
+                . " title='view upcoming shows of this program'"
+                . "   alt='view upcoming shows of this program'"
+                ."' >"
+		            . "<button>upcoming shows</button></a>" ;
 
 		echo "</div><br>&nbsp";
 	}

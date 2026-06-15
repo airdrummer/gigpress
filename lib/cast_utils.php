@@ -1,4 +1,4 @@
-1`<?php
+<?php
 /**
  * 1. REGISTER THE "CASTS" CUSTOM POST TYPE
  */
@@ -251,13 +251,25 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
                         'past'    => false, // display past casts (in mcpt_add_query_vars)
                     	),
                     $atts, 'cast_list' ));
+ 
+    $past = (bool) $atts['past'];
+	$what = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
+	$what_slug = sanitize_title($what);
+
     $show_id = intval(sanitize_text_field( $atts['show_id'] ));
     if ($show_id > 0)
-    	return bc_musician_list($show_id, 1, $content);
+    	return bc_musician_list($show_id, 1, $content)
+				. "<p class='floatright cast-link'><a href='/about/company-collaborators/"
+					. sprintf( "%s' "
+            			. "title='click to display %s'"
+            			. "  alt='click to display %s'" . " >"
+            			. "<button>%s</button>",
+            		 	$what_slug, $what, $what, $what)
+            	. "</a></p>";
 
-    $past = (bool) $atts['past'];
-
+	$what =  "this performance&#39;s cast"; // for title links
     global $wpdb;
+
     // Query the show details along with its corresponding artist and venue
     $shows = $wpdb->get_results( 
     			$wpdb->prepare(
@@ -267,10 +279,12 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
                                     . " WHERE s.show_status != 'deleted' AND s.cast_id > 0"
                                         . " AND s.show_expire " . ($past ? "<" : ">=") . " '" . GIGPRESS_NOW . "'"
-							.' ORDER BY s.show_date ASC;'
-						    	) );
+							.' ORDER BY s.show_date ' . ($past ? "DESC" : "ASC") . ';'
+						) );
     ob_start();
+    
     echo $content;
+
 	echo "<div class=" . ($past ? "past" : "upcoming") . "-casts>";
 	
 	if (! $shows )
@@ -284,15 +298,15 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 	        if( $previous_show->artist_name == $show->artist_name) 
 	            $show->artist_name = '';
 
-            echo "<h2 class=" . (empty($show->artist_name) 
-                                ? "same-prog" : "next-prog")
-                            . ">";
+            echo "<h2 class=" . (empty($show->artist_name)  ? "same-prog" : "next-prog") . ">";
 		        echo "<a href='/about/company-collaborators/"
-        	            . ($scope == 'past'
-                            ? "this-seasons-casts" 
-                            : 'past-seasons-casts')
-                        . "/?show_id=" . $show->show_id
-                        . "&program_id=" . $show->artist_id . "'>";
+            			. sprintf( "%s", $what_slug)
+                        . "/?show_id="   . $show->show_id
+                        . "&program_id=" . $show->artist_id . "' "
+            			. sprintf( " title='click to display %s'"
+	            				   . " alt='click to display %s'",
+            		 			$what, $what)
+                        . " >";
                     echo show_title($show);
             echo "</a></h2>";
 
@@ -302,7 +316,18 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 	        $previous_show = $show;	
 		}
 	}
+
+	$what = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
+    echo  "<p class='floatright cast-link'><a href='/about/company-collaborators/"
+            . sprintf( "%s' "
+            			. "title='click to display %s'"
+            			. "  alt='click to display %s'" . " >"
+            			. "<button>%s</button>",
+            		 $what_slug, $what, $what, $what)
+            . "</a></p>";
+
 	echo "</div>";
+	
 	return ob_get_clean();
 }
 add_shortcode( 'upcoming_casts', 'bc_list_upcoming_casts_shortcode' );

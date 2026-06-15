@@ -34,7 +34,7 @@ function gigpress_shows( $filter = null, $content = null )
 			'venue'           => false,
 			'limit'           => false,
 			'scope' => 'upcoming',
-			'sort'            => false,
+			'sort'            => 'ASC',
 			'group_artists' => 'no',
 			'artist_order' => 'alpha',
 			'condensed' => 0,		// >0=hide gig-notes, >1= hide program descr.div also
@@ -51,7 +51,7 @@ function gigpress_shows( $filter = null, $content = null )
 	// Query vars take precedence over function vars
 	if(isset($_REQUEST['condensed']))
 		$condensed = sanitize_text_field($_REQUEST['condensed']);
-	$condensed = 0 + $condensed;
+	$condensed = intval($condensed);
 
 	if(isset($_REQUEST['scope']))
 		$scope = sanitize_text_field($_REQUEST['scope']);
@@ -61,21 +61,19 @@ function gigpress_shows( $filter = null, $content = null )
 	{
 		case 'upcoming':
 			$date_condition = "show_expire >= '" . GIGPRESS_NOW . "'";
-			if(empty($sort)) $sort = 'asc';
 			break;
 		case 'past':
 			$date_condition = "show_expire <  '" . GIGPRESS_NOW . "'";
-			if(empty($sort)) $sort = 'desc';
+			$sort = 'desc';
 			break;
 		case 'today':
 			$date_condition = "show_expire >= '" . GIGPRESS_NOW 
 						. "' AND show_date <= '" . GIGPRESS_NOW . "'";
-			if(empty($sort)) $sort = 'asc';
 			break;
 		case 'all':
 		default:
 			$date_condition = "show_expire != ''";
-			if(empty($sort)) $sort = 'desc';
+			$sort = 'desc';
 	}
 	
 	// Query vars take precedence over function vars

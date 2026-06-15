@@ -66,12 +66,13 @@ function bc_musician_list( $show_id, $revealheadshot, $content )
 		$cast_title  = $cast_data[0];
 		$instruments = $cast_data[1]; // Holds the ordered multidimensional meta mapping matrix
 
-		echo "<h2 class='cast-title' id='show-" . $show_id . "' title='". $cast_title . "'>" 
-		        . '<a href=/performances/?condensed=1';
-	    	                    echo "&program_id=" . $program_id;
-	    	                    echo "&show_id="    . $show_id;
-	    	                    echo '#prog-note-'  . $show_id
-	    	                . '>';
+		echo "<h2 class='cast-title' id='show-" . $show_id . "'"
+		        . " title='click to show performance&#39;s description'" 
+		         . "  alt='click to show performance&#39;s description'" . " >"; 
+		    echo '<a href=/performances/?condensed=0'
+	    	           . "&program_id=" . $program_id
+	    	           . "&show_id="    . $show_id
+	    	      . '>';
 		                echo $show_title;
 		echo "</a></h2><hr>";
 
