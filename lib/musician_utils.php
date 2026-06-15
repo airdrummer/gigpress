@@ -56,7 +56,8 @@ function bc_musician_list( $show_id, $revealheadshot, $content )
 
     ob_start();
 
-    echo $content;
+include GIGPRESS_PLUGIN_DIR . '/lib/toggle_details.php';
+
     echo '<div class=musician-list>';
 
 	if ( $show_id > 0 )

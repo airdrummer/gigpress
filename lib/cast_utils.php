@@ -253,7 +253,7 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
                     $atts, 'cast_list' ));
  
     $past = (bool) $atts['past'];
-	$what = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
+	$what = ( ! $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
 	$what_slug = sanitize_title($what);
 
     $show_id = intval(sanitize_text_field( $atts['show_id'] ));
@@ -279,11 +279,9 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
                                     . " WHERE s.show_status != 'deleted' AND s.cast_id > 0"
                                         . " AND s.show_expire " . ($past ? "<" : ">=") . " '" . GIGPRESS_NOW . "'"
-							.' ORDER BY s.show_date ' . ($past ? "DESC" : "ASC") . ';'
+							. ' ORDER BY s.show_date ' . ($past ? "DESC" : "ASC") . ';'
 						) );
     ob_start();
-    
-    echo $content;
 
 	echo "<div class=" . ($past ? "past" : "upcoming") . "-casts>";
 	
@@ -318,6 +316,7 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 	}
 
 	$what = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
+	$what_slug = sanitize_title($what);
     echo  "<p class='floatright cast-link'><a href='/about/company-collaborators/"
             . sprintf( "%s' "
             			. "title='click to display %s'"
