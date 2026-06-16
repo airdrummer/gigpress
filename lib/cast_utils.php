@@ -258,7 +258,7 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 
     $show_id = intval(sanitize_text_field( $atts['show_id'] ));
     if ($show_id > 0)
-    	return bc_musician_list($show_id, 1, $content)
+    	return bc_musician_list($show_id, true, false, $content)
 				. "<p class='floatright cast-link'><a href='/about/company-collaborators/"
 					. sprintf( "%s' "
             			. "title='click to display %s'"

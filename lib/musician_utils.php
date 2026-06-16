@@ -33,7 +33,8 @@ function bc_musician_list_shortcode( $atts, $content=null )
                         'show_id'    => 0, // display musicians/instr in a show's cast 
                         'revealheadshot' => false,
                         'list_instruments' => false,
-                    	),
+                        'allow_initial_desktop_expand' => false,
+                    ),
                     $atts, 'musician_list' ));
 
     if( (bool) ($atts['list_instruments'] ?? false))
@@ -41,12 +42,13 @@ function bc_musician_list_shortcode( $atts, $content=null )
 
 	$show_id    = intval(strtolower(sanitize_text_field( $atts['show_id'] )));
 	$revealheadshot = (bool) ($atts['revealheadshot'] ?? false);
+	$allow_initial_desktop_expand = (bool) ($atts['allow_initial_desktop_expand'] ?? false);
 	
-	return bc_musician_list( $show_id, $revealheadshot, $content );
+	return bc_musician_list( $show_id, $revealheadshot, $allow_initial_desktop_expand, $content );
 }
 add_shortcode( 'musician_list', 'bc_musician_list_shortcode' );
 
-function bc_musician_list( $show_id, $revealheadshot, $content ) 
+function bc_musician_list( $show_id, $revealheadshot, $allow_initial_desktop_expand, $content ) 
 {
     $args = array(
         'post_type'      => 'musician',
@@ -55,8 +57,6 @@ function bc_musician_list( $show_id, $revealheadshot, $content )
     );
 
     ob_start();
-
-include GIGPRESS_PLUGIN_DIR . '/lib/toggle_details.php';
 
     echo '<div class=musician-list>';
 
@@ -107,7 +107,9 @@ include GIGPRESS_PLUGIN_DIR . '/lib/toggle_details.php';
 	}
 
     echo '</div>';
-    
+        
+include GIGPRESS_PLUGIN_DIR . '/lib/toggle_details.html';
+
     return ob_get_clean();
 }
 
