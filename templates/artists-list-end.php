@@ -1,11 +1,16 @@
-<!--gigpress prog-list-end start -->
+<!-- begin gigpress artist-list-end -->
+
 <?php
+//	bostoncamerata.org
+//--gigpress prog-list-end start
 
 	if( $atts['program_id'] or $atts['genres'] 
 	    or !empty($srchstrgs) || !empty($selected_genres))
 	{
 		echo "<style type='text/css'>.hero-image { display: none; } </style>";
-	 	echo "<h4><a class=floatright href='" . get_permalink() . "'>view all programs</a></h4>";
+		echo "<div class=embed-viewall><a href='" . get_permalink() . "'>"
+                . '<button class=viewall>view all programs</button>'
+            . "</a></div>";
 	}
 ?>
-<!--gigpress prog-list-end end -->
+<!-- end gigpress artist-list-end -->

@@ -31,6 +31,7 @@ function bc_musician_list_shortcode( $atts, $content=null )
                 shortcode_atts( 
                     array(
                         'show_id'    => 0, // display musicians/instr in a show's cast 
+                        'past' => false,
                         'revealheadshot' => false,
                         'list_instruments' => false,
                         'allow_initial_desktop_expand' => false,
@@ -40,15 +41,16 @@ function bc_musician_list_shortcode( $atts, $content=null )
     if( (bool) ($atts['list_instruments'] ?? false))
         return bc_instruments_list();
 
-	$show_id    = intval(strtolower(sanitize_text_field( $atts['show_id'] )));
-	$revealheadshot = (bool) ($atts['revealheadshot'] ?? false);
+	$show_id                      = intval(strtolower(sanitize_text_field( $atts['show_id'] )));
+	$past                         = (bool) ($atts['past'] ?? false);
+	$revealheadshot               = (bool) ($atts['revealheadshot'] ?? false);
 	$allow_initial_desktop_expand = (bool) ($atts['allow_initial_desktop_expand'] ?? false);
-	
-	return bc_musician_list( $show_id, $revealheadshot, $allow_initial_desktop_expand, $content );
+
+	return bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desktop_expand, $content );
 }
 add_shortcode( 'musician_list', 'bc_musician_list_shortcode' );
 
-function bc_musician_list( $show_id, $revealheadshot, $allow_initial_desktop_expand, $content ) 
+function bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desktop_expand, $content ) 
 {
     $args = array(
         'post_type'      => 'musician',
@@ -62,24 +64,25 @@ function bc_musician_list( $show_id, $revealheadshot, $allow_initial_desktop_exp
 
 	if ( $show_id > 0 )
 	{
-		[$show_title, $program_id, $cast_data, $assist_data] = get_gigpress_show_cast_data($show_id);
+		[$show_title, $program_id, $cast_data, $assist_data]
+		    = get_gigpress_show_cast_data($show_id, $past);
 
 		$cast_title  = $cast_data[0];
 		$instruments = $cast_data[1]; // Holds the ordered multidimensional meta mapping matrix
 
 		echo "<h2 class='cast-title' id='show-" . $show_id . "'"
-		        . " title='click to show performance&#39;s description'" 
-		         . "  alt='click to show performance&#39;s description'" . " >"; 
-		    echo '<a href=/performances/?condensed=0'
+		        . " title='click to view programs&#39;s description'" 
+		         . "  alt='click to view programs&#39;s description'" . " >"; 
+		    echo "<a href=/performances/?condensed=0"
+			            . ($past ? "&scope=past" : '')
 	    	           . "&program_id=" . $program_id
-	    	           . "&show_id="    . $show_id
-	    	      . '>';
-		                echo $show_title;
+	    	           . "&show_id="    . $show_id . "'>";
+		        echo $show_title;
 		echo "</a></h2><hr>";
 
 		if ( empty($instruments) )
 		{
-		    echo "<h3>-- no cast assigned --</h3>";
+		    echo "<h3>-- no cast assigned to $show_title --</h3>";
             return ob_get_clean();
 		}
 		

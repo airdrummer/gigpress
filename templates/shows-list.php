@@ -1,3 +1,4 @@
+<!-- begin gigpress shows-list -->
 <?php
 /*
 	This template displays all of our individual show data in the main shows listing (upcoming and past).
@@ -13,7 +14,7 @@ if($yr != $current_year) :
 	$current_year = $yr;
 	$current_month = 0;
 	$current_day = 0;
-	$current_program = "";
+	//$current_program = "";
 	$current_venue   = "";
  ?>
 <?php endif; ?>
@@ -30,39 +31,51 @@ if($yr != $current_year) :
 
     <div class="event" id="prog-<?php echo $showdata['id']; ?>">    <!-- start event -->
 
-<?php if($showdata['artist_plain'] != $current_program) :
-	 	$current_program = $showdata['artist_plain'];
+<?php 
+    
+    $new_program = intval($showdata['artist_plain'] !== $current_program);
+    if( $new_program > 0 )
+    {
+        $current_program = $showdata['artist_plain'];
  ?>
 		<a title='click to show/hide program description'
 						 href="#prog-<?php echo $showdata['id']; ?>"
 						onclick="return showInfo('prog-note-<?php echo $showdata['id']; ?>')" >
-			<h2 class="progtitle" ><?php echo bc_bankhead($current_program); ?></h2></a>
-
-	<?php if (  !empty($showdata['program_notes'])
-		     || !empty($showdata['program_genres'])) : ?>
-		<div class="prog-note"
-			 <?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
-			 id="prog-note-<?php echo $showdata['id']; ?>"> <!-- start prog-note -->
-<?php 
-			echo $showdata['program_notes']; 
-			if (!empty($showdata['program_genres']))
-				echo '<div class="floatright prog-genres" style="margin-top:-1em;">'
-					 . $showdata['program_genres'] . '</div><br>'; 
-
-			?>
-				
-			<div class="prog-note-toggle">
-				<a title='open program description page'
-					href="/programs-repertoire/?program_id=<?php echo $showdata['artist_id']; ?>">
-			    <h3 class="gig-pup">program page</h3></a>
-			</div><!-- prog-note-toggle shown in wptouch -->	
-<p>&nbsp;</p>
-		</div> <!-- end prog-note -->
-	<?php endif; ?>
-<?php endif; ?>	
+			<h2 class="progtitle" >
+			    <?php echo bc_bankhead($current_program); ?>
+		</h2></a>
 		
+	    <div class="prog-note"
+		    	 <?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
+			    id="prog-note-<?php echo $showdata['id']; ?>"> <!--  prog-note -->
+<?php
+            echo $showdata['program_notes'];
+
+			echo '<div class="floatright prog-genres" >'
+					 . $showdata['program_genres'] . '</div><br>'; 
+	    echo "</div>";
+    } ?>
+		<div class="embed-viewall">
+<?php
+        if( $showdata['cast_id'] > 0 )
+        {
+ ?>         <a  title='display this show&#39;s cast' alt='display this show&#39;s cast'
+		        href='/about/company-collaborators/this-seasons-casts?show_id=<?php echo $showdata['id']; ?>' >
+		        <button class="viewall">Cast</button></a>
+<?php   }
+
+        if( $new_program > 0 )
+        {
+?>			<a title='open program description page' title='open program description page'
+			    href="/programs-repertoire/?program_id=<?php echo $showdata['artist_id']; ?>">
+			    <button class="viewall">program</button></a>
+<?php
+        } ?>
+        </div> <!-- prog-note-toggle shown in wptouch -->	
+        
         <div class="gig-date">
-<?php   if($day != $current_day) 
+<?php   
+        if($day != $current_day) 
 		{
         	$current_day = $day;
         	echo ucwords(substr($monthname,0,3)) . "&nbsp;" . $current_day;
@@ -112,7 +125,7 @@ if($yr != $current_year) :
 		} ?>
     </div>
     
-	<div class="gig-tix"  > 
+	<div class="gig-tix" title='click to purchase tickets' > 
 <?php if(!empty($showdata['status']))
 	{
 		if( $showdata['status']== 'active'
@@ -131,15 +144,6 @@ if($yr != $current_year) :
 			echo "<h3>Sold Out!</h3>";
 	}
 ?> 
-<?php
-        if( $showdata['cast_id'] > 0 )
-        {
-			echo "<br><a class='info-right' title='display show cast'"
-				    . ' href="/about/company-collaborators/this-seasons-casts?show_id='
-				    . $showdata['id'] . '">'
-		            . '<h3 class="gig-pup" style="margin-right: 3em;">Cast</h3></a>';
-        } 
-?>
 	</div> 
 
 	<?php if(!empty($showdata['notes'])
@@ -168,6 +172,8 @@ if($yr != $current_year) :
 		</div> <!-- end external_link -->
 <?php endif; ?>	
 
-    </div>       <!-- gigpress end show -->
+    </div>
+    
 <br clear=both>
 <hr>
+<!-- end gigpress shows-list -->

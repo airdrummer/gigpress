@@ -495,7 +495,7 @@ function gigpress_add() {
 
 				<tbody>
 <?php
-    [$show_title, $selected_cast_id, $selected_assist_id] = get_gigpress_show_title_cast_ids($show_id);
+    [$show_title, $program_id, $selected_cast_id, $selected_assist_id] = get_gigpress_show_title_cast_ids($show_id);
 
     $casts = get_posts([
         'post_type'   => 'cast',

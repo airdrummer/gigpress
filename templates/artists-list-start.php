@@ -1,4 +1,4 @@
-<!-- begin gigpress prog-list-start -->
+<!-- begin gigpress artist-list-start-->
 <?php
 
 	if ($atts['genres']) // shortcode or query arg
@@ -12,7 +12,6 @@
 			foreach($programs as $program) 
 				if (in_array($program->artist_id, $excluded_ids))
 						--$n;
-
 		echo "<h4 class=search-results>" 
 		    . ($n   ? $n . " program" . ($n >1 ? "s" : '')
 			       	: "no programs")
@@ -22,4 +21,4 @@
 	 	echo '<button style="float:right;" onclick="openSearch(\'genre\');">search again</button>';
 	}
 ?>
-<!-- end gigpress prog-list-start -->
+<!-- end gigpress artist-list-start-->

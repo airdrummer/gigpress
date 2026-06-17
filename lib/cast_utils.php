@@ -252,22 +252,29 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
                     	),
                     $atts, 'cast_list' ));
  
-    $past = (bool) $atts['past'];
-	$what = ( ! $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
-	$what_slug = sanitize_title($what);
+    $past  = (bool) ($atts['past'] ?? false);
+	$what  = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
+    $where = sanitize_title($what); //-hardcoded path-\
 
     $show_id = intval(sanitize_text_field( $atts['show_id'] ));
-    if ($show_id > 0)
-    	return bc_musician_list($show_id, true, false, $content)
-				. "<p class='floatright cast-link'><a href='/about/company-collaborators/"
-					. sprintf( "%s' "
-            			. "title='click to display %s'"
-            			. "  alt='click to display %s'" . " >"
-            			. "<button>%s</button>",
-            		 	$what_slug, $what, $what, $what)
-            	. "</a></p>";
 
-	$what =  "this performance&#39;s cast"; // for title links
+    if ($show_id > 0)
+    {
+	    $click_what =  "click to display this performance&#39;s " . $what; // for title links
+
+    	return "<div class='top-viewall'><a href='/about/company-collaborators/". $where
+                                . "/?show_id="   . $show_id . "'"
+                    			. " title='$click_what'"
+                    			. "   alt='$click_what'" . " >"
+                    			. "<button class=viewall>$what</button>"
+                        	. "</a>"
+                    . "<h3 class='gig-pup'><br>Of " 
+                        . ($show_id ? 'An ' : '') . ($scope != 'past' ? "Upcoming" : "Past")
+                            . " performance" . ($show_id ? '' : 's') . " of this program</h3>"
+            	."</div>"
+            	. bc_musician_list($show_id, $past, true, false, $content);
+    }
+
     global $wpdb;
 
     // Query the show details along with its corresponding artist and venue
@@ -283,13 +290,22 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 						) );
     ob_start();
 
+    echo  "<div class='top-viewall'><a href='/about/company-collaborators/"
+                        . sanitize_title($what) . "'"
+                        . " title='click to display $what'"
+            			. "  alt='click to display $what'" . " >"
+            			. "<button class='viewall'>$what</button>"
+                . "</a></div>";
+
 	echo "<div class=" . ($past ? "past" : "upcoming") . "-casts>";
 	
 	if (! $shows )
-	    echo "-- no casts found --";
+	    echo "-- no casts assigned --";
 	else
 	{
+	    $what = ( ! $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
 	    $previous_show = (object) ['artist_name' => '']; // initial for compare
+	    $click_what =  "click to display this performance&#39;s cast"; // for title links
 
 	    foreach($shows as $show)
 	    {
@@ -297,14 +313,12 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 	            $show->artist_name = '';
 
             echo "<h2 class=" . (empty($show->artist_name)  ? "same-prog" : "next-prog") . ">";
-		        echo "<a href='/about/company-collaborators/"
-            			. sprintf( "%s", $what_slug)
+		        echo "<a href='/about/company-collaborators/" . sanitize_title($what)
                         . "/?show_id="   . $show->show_id
-                        . "&program_id=" . $show->artist_id . "' "
-            			. sprintf( " title='click to display %s'"
-	            				   . " alt='click to display %s'",
-            		 			$what, $what)
-                        . " >";
+                        . "&program_id=" . $show->artist_id . "'"
+            			. " title='$click_what'"
+            			. "   alt='$click_what'"
+                    . " >";
                     echo show_title($show);
             echo "</a></h2>";
 
@@ -314,24 +328,13 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 	        $previous_show = $show;	
 		}
 	}
-
-	$what = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
-	$what_slug = sanitize_title($what);
-    echo  "<p class='floatright cast-link'><a href='/about/company-collaborators/"
-            . sprintf( "%s' "
-            			. "title='click to display %s'"
-            			. "  alt='click to display %s'" . " >"
-            			. "<button>%s</button>",
-            		 $what_slug, $what, $what, $what)
-            . "</a></p>";
-
 	echo "</div>";
 	
 	return ob_get_clean();
 }
 add_shortcode( 'upcoming_casts', 'bc_list_upcoming_casts_shortcode' );
 
-function get_gigpress_show_title_cast_ids( $show_id ) 
+function get_gigpress_show_title_cast_ids( $show_id, $past ) : array
 {
 	if( ! $show_id )
     	return ['', 0, 0, 0];
@@ -344,15 +347,20 @@ function get_gigpress_show_title_cast_ids( $show_id )
 				         FROM " . GIGPRESS_SHOWS . " AS s"
 					         . " LEFT JOIN " . GIGPRESS_ARTISTS . " AS a ON s.show_artist_id = a.artist_id"
 						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
-							         . " WHERE s.show_id = %d",
+							         . " WHERE s.show_id = %d"
+                                        . " AND s.show_expire " . ($past ? "<" : ">=") . " '" . GIGPRESS_NOW . "'"
+							. ' ORDER BY s.show_date ' . ($past ? "DESC" : "ASC") . ';',
 							        intval( $show_id )
 					      ) );
+	if( ! $show )
+    	return ['', 0, 0, 0];
     return [show_title($show), intval( $show->artist_id ), intval( $show->cast_id ), intval( $show->assist_id )];
 }
 
-function get_gigpress_show_cast_data( $show_id ): array
+function get_gigpress_show_cast_data( $show_id, $past ): array
 {
-	[$show_title, $program_id, $cast_id, $assist_id] = get_gigpress_show_title_cast_ids($show_id);
+	[$show_title, $program_id, $cast_id, $assist_id]
+	            = get_gigpress_show_title_cast_ids($show_id, $past);
 	$cast_data   = get_gigpress_cast_data( $cast_id );
 	$assist_data = get_gigpress_cast_data( $assist_id );
 
@@ -361,14 +369,13 @@ function get_gigpress_show_cast_data( $show_id ): array
 
 function get_gigpress_cast_data( $cast_id ): array
 {
-	if ($cast_id > 0) 
-	{
-	    $cast_title   = get_the_title($cast_id);
-	    $instruments  = get_post_meta($cast_id, '_cast_data', true);
+	if ( ! $cast_id ) 
+	    return ['', [] ];
 
-      	return [$cast_title, $instruments];
-	}
-	return ['', [] ];
+    $cast_title   = get_the_title($cast_id);
+    $instruments  = get_post_meta($cast_id, '_cast_data', true);
+
+  	return [$cast_title, $instruments];
 }
 
 function get_cast_instruments_string( $musician_instruments )

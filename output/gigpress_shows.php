@@ -346,13 +346,13 @@ function gigpress_shows( $filter = null, $content = null )
 	
 	if ( ($scope == 'past') && $program_id && ! $show_id)
 	{
-	 	echo "<div class=viewall><a href='/performances/past-performances/prior-to-2014/";
+	 	echo "<div class=embed-viewall><a href='/performances/past-performances/prior-to-2014/";
 		if( $program_id )
 			echo $program_name; // program_name set above or in shows-list-empty
-	 	echo "'>Search for performances";
+	 	echo "'><button class=viewall>Search for performances";
 		if( $program_id )
 			echo " of this program";
-		echo " prior to 2014</a></div><br>&nbsp;";
+		echo " prior to 2014</button></a></div><br>&nbsp;";
 	}
 
 	if( $show_menu || (! $program_id && ! $show_id) )

@@ -1,7 +1,5 @@
-<?php
-	 // This template closes  a list of shows. 
-?>
-<!--begin gigpress show-list-end  -->
+<!-- begin gigpress shows-list-end -->
+
 <script type="text/javascript">
 	var currentInfo = null;
 	function showInfo(id)
@@ -24,5 +22,5 @@
 		return false;
 	}
 	</script>
-<!--end gigpress show-list-end  -->
 
+<!-- end gigpress show-list-end  -->
