@@ -48,7 +48,8 @@
     		            . "<button class='viewall'>upcoming shows</button></a>";
 
         echo "<h3 class='gig-pup'><br>" 
-                        . ($show_id ? 'An ' : '') . $scope_str
+                        . ($show_id ? 'A' . ($scope != 'past' ? "n " : " ")
+                                    : '') . $scope_str
                         . " performance" . ($show_id ? '' : 's')
                         . " of this program</h3>";
     }

@@ -5,9 +5,11 @@
 function mcpt_add_query_vars($qVars) //  shortcode atts are lowercase
 {
         $qVars[] = "show_id";
+        $qVars[] = "program_id";
         $qVars[] = 'revealheadshot';
         $qVars[] = 'list_instruments';
         $qVars[] = 'past';
+        $qVars[] = 'allow_initial_desktop_expand';
         return $qVars;
 }
 add_filter('query_vars', 'mcpt_add_query_vars');
@@ -31,6 +33,7 @@ function bc_musician_list_shortcode( $atts, $content=null )
                 shortcode_atts( 
                     array(
                         'show_id'    => 0, // display musicians/instr in a show's cast 
+                        'program_id' => 0, // display musicians/instr in a show's cast 
                         'past' => false,
                         'revealheadshot' => false,
                         'list_instruments' => false,
@@ -42,6 +45,7 @@ function bc_musician_list_shortcode( $atts, $content=null )
         return bc_instruments_list();
 
 	$show_id                      = intval(strtolower(sanitize_text_field( $atts['show_id'] )));
+	$program_id                   = intval(strtolower(sanitize_text_field( $atts['program_id'] )));
 	$past                         = (bool) ($atts['past'] ?? false);
 	$revealheadshot               = (bool) ($atts['revealheadshot'] ?? false);
 	$allow_initial_desktop_expand = (bool) ($atts['allow_initial_desktop_expand'] ?? false);
@@ -68,7 +72,19 @@ function bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desk
 		    = get_gigpress_show_cast_data($show_id, $past);
 
 		$cast_title  = $cast_data[0];
-		$instruments = $cast_data[1]; // Holds the ordered multidimensional meta mapping matrix
+		$instruments = $cast_data[1]; // Holds the ordered list of instruments by cast member
+		if ( empty($instruments) )
+		{
+		    echo "<br><div class=ctr>no cast assigned to this" 
+		                . ($past ? " past" : '') . " performance of "
+		            . "<h2 class='show-title' id='prog-$program_id'>"
+		                . "<a href='/performances/?condensed=0&program_id=" . $program_id . "'"
+		                        . " title='click to view upcoming performances'" 
+		                        . "  alt='click to view upcoming performances'" . " >"
+		                    . $show_title . "</a></h2></div>";
+            echo '</div>';
+            return ob_get_clean();
+		}
 
 		echo "<h2 class='cast-title' id='show-" . $show_id . "'"
 		        . " title='click to view programs&#39;s description'" 
@@ -80,12 +96,6 @@ function bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desk
 		        echo $show_title;
 		echo "</a></h2><hr>";
 
-		if ( empty($instruments) )
-		{
-		    echo "<h3>-- no cast assigned to $show_title --</h3>";
-            return ob_get_clean();
-		}
-		
 		// CRITICAL: Force WordPress to output elements in array key order
 		$args['post__in'] = array_keys($instruments);
 		$args['orderby']  = 'post__in';
