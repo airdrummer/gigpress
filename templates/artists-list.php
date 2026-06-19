@@ -1,5 +1,7 @@
 <!-- begin gigpress artist-list -->
- 	<hr clear=left style="margin-top:2em;">
+
+ 	<hr style="margin-top:1em; clear:both;">
+
 	<div class="gigpress-artist" id="program-' 
 		. <?php echo $showdata['artist_id']; ?> . '">'
  ?>
