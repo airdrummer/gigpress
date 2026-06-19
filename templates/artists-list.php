@@ -1,15 +1,18 @@
 <!-- begin gigpress artist-list -->
  	<hr clear=left style="margin-top:2em;">
+	<div class="gigpress-artist" id="program-' 
+		. <?php echo $showdata['artist_id']; ?> . '">'
+ ?>
+		<a title='click to show/hide program description'
+			href="#prog-"
+			onclick="return showInfo('prog-note-<?php echo $showdata['artist_id']; ?>')" >
+			<h2 class="progtitle" >
+			    <?php echo bc_bankhead($showdata['artist']); ?>
+		</h2></a>
 <?php
-	echo '<div class="gigpress-artist" id="program-' . $showdata['artist_id'] . '">'
-            . '<h2 class=progtitle><a href="/programs-repertoire/?program_id='
-                    . $showdata['artist_id'] . '" title="open program description">'
-                    	. bc_bankhead($showdata['artist'])
-            . '</a></h2>';
-
 		if(!empty($showdata['program_notes']))
 		{
-			echo '<div class="prog-note" id="prognote-' . $showdata['artist_id'] . '" ><!-- start prog-note -->';
+			echo '<div class="prog-note" id="prog-note-' . $showdata['artist_id'] . '" > <!-- start prog-note -->';
 			echo $showdata['program_notes'];
 			if(!empty($gpo['artist_link'])
 		  	&& !empty($showdata['artist_url'])
@@ -28,7 +31,7 @@
     		echo '<a href="/performances/past-performances/?condensed=1&program_id=' . $showdata['artist_id'] . '">'
 				  . '<button class=viewall>Past&nbsp;Performances</button></a>';
         echo "</div>";
-        
+
 		if(!empty($gpo['display_subscriptions']))
 		{
 			echo '<div class="info-right">';

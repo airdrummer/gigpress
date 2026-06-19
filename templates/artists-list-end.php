@@ -1,8 +1,6 @@
 <!-- begin gigpress artist-list-end -->
 
 <?php
-//	bostoncamerata.org
-//--gigpress prog-list-end start
 
 	if( $atts['program_id'] or $atts['genres'] 
 	    or !empty($srchstrgs) || !empty($selected_genres))
@@ -12,5 +10,8 @@
                 . '<button class=viewall>view all programs</button>'
             . "</a></div>";
 	}
+	
+	include GIGPRESS_PLUGIN_DIR . '/scripts/showInfo-js.html';
+
 ?>
 <!-- end gigpress artist-list-end -->

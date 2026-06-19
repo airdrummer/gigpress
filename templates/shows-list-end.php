@@ -1,26 +1,5 @@
 <!-- begin gigpress shows-list-end -->
 
-<script type="text/javascript">
-	var currentInfo = null;
-	function showInfo(id)
-	{
-		if(currentInfo != null)
-			currentInfo.style.display = "none";
-
-		if(id != null)
-		{
-			ci = document.getElementById(id);
-			if(currentInfo == ci)
-				currentInfo = null;
-			else 
-			{
-				currentInfo = ci;
-				currentInfo.style.display = "block";
-			}
-			return true;
-		}
-		return false;
-	}
-	</script>
+	include GIGPRESS_PLUGIN_DIR . '/scripts/showInfo-js.html';
 
 <!-- end gigpress show-list-end  -->
