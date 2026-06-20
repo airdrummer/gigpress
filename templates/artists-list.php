@@ -2,11 +2,9 @@
 
  	<hr style="margin-top:1em; clear:both;">
 
-	<div class="gigpress-artist" id="program-' 
-		. <?php echo $showdata['artist_id']; ?> . '">'
- ?>
+	<div class="gigpress-artist" id="program-<?php echo $showdata['artist_id']; ?>" >
 		<a title='click to show/hide program description'
-			href="#prog-"
+			href="#program-<?php echo $showdata['artist_id']; ?>"
 			onclick="return showInfo('prog-note-<?php echo $showdata['artist_id']; ?>')" >
 			<h2 class="progtitle" >
 			    <?php echo bc_bankhead($showdata['artist']); ?>
@@ -28,10 +26,10 @@
 			echo "<div class='floatright prog-genres'>" . $showdata['genres'] . "</div><br>";
 
 		echo '<div class="embed-viewall">';	
-    		echo '<a href="/performances/?condensed=1&program_id=' . $showdata['artist_id'] . '">'
-				  . '<button class=viewall>Upcoming&nbsp;Performances</button></a>';
-    		echo '<a href="/performances/past-performances/?condensed=1&program_id=' . $showdata['artist_id'] . '">'
-				  . '<button class=viewall>Past&nbsp;Performances</button></a>';
+    		echo '<a href="/performances/?condensed=1&program_id=' . $showdata['artist_id']
+				  . '" class=viewall >Upcoming&nbsp;Performances</a>';
+    		echo '<a href="/performances/past-performances/?condensed=1&program_id=' . $showdata['artist_id']
+				  . '" class=viewall >Past&nbsp;Performances</a>';
         echo "</div>";
 
 		if(!empty($gpo['display_subscriptions']))

@@ -33,24 +33,21 @@
             	
 				    echo "<a href='/programs-repertoire/?program_id=" . $program_id . "'"
 				                . " title='view program description'"
-                    			. "   alt='view program description'" . " >"
-                            . '<button class=viewall>view program description</button>'
-					    . "</a>";
+                    			. "   alt='view program description'" 
+                    			. " class=viewall >view program description</a>";
 
 		 		if ($scope != 'all')
 		 		{
 		 			if (($scope != 'upcoming') or isset($dateRange) )
 		 				echo "<a href=/performances/?program_id=" . $program_id . "'"
 				                . " title='view upcoming performances of this program'"
-                    			. "   alt='view upcoming performances of this program'" . " >"
-                                . '<button class=viewall>view upcoming performances</button>'
-		 				   .  "</a>";
+                    			. "   alt='view upcoming performances of this program'" 
+                                . " class=viewall >view upcoming performances</a>";
 		 			if ($scope != 'past')
 			 			echo "<a href=/performances/past-performances?program_id=" . $program_id . "'"
 				                . " title='view past performances of this program'"
-                    			. "   alt='view past performances of this program'" . " >"
-                                . '<button class=viewall>view past performances</button>'
-		 				   .  "</a>";
+                    			. "   alt='view past performances of this program'"
+                                . " class=viewall>view past performances</a>";
 		 		}
 		 		echo "</div>";
 		 		$program_name = "?title=" . urlencode($program_name); // for /pastPerfs.html single program

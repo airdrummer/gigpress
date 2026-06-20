@@ -288,10 +288,10 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 						) );
     ob_start();
     
-    echo  "<div class='top-viewall'><a href='/about/company-collaborators/" . $where . "'"
+    echo  "<div class='top-viewall'><a class='viewall' href='/about/company-collaborators/" . $where . "'"
                         . " title='click to display $click_what'"
             			. "  alt='click to display $click_what'" . " >"
-            			. "<button class='viewall'>$what</button>" . "</a></div>";
+            			    . $what . "</a></div>";
  	if (! $shows )
  	{
  	    echo "<h3 class='gig-pup ctr'>-- no casts assigned --</h3>";
@@ -332,7 +332,7 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 }
 add_shortcode( 'upcoming_casts', 'bc_list_upcoming_casts_shortcode' );
 
-function get_gigpress_show_title_cast_ids( $show_id, $past ) : array
+function get_gigpress_show_title_cast_ids( $show_id, $past = false) : array
 {
 	if( ! $show_id )
     	return ['no show id', 0, 0, 0];

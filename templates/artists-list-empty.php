@@ -16,9 +16,8 @@
     	{
             echo " matching '" . implode("' $logic '", $terms) . "'";
             echo "<style type='text/css'>.hero-image { display: none; } </style>";
-		    echo "<div class=top-viewall><a href='" . get_permalink() . "'>"
-                . '<button class=viewall>view all programs</button>'
-            . "</a></div>";
+		    echo "<div class=top-viewall><a class='viewall button' href='" . get_permalink() . "'>"
+                . "view all programs</a></div>";
     	}
     ?>
 </h4>

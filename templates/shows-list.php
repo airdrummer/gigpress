@@ -4,35 +4,31 @@
 	This template displays all of our individual show data in the main shows listing (upcoming and past).
 	If you're curious what all variables are available in the $showdata array, have a look at the docs: http://gigpress.com/docs/
 */
+    $eventdtarray = explode("-", $showdata['date_mysql']);
+    $yr = $eventdtarray['0'];
+    $mo = intval($eventdtarray['1']);
+    $day = intval($eventdtarray['2']);
 
- $eventdtarray = explode("-", $showdata['date_mysql']);
- $yr = $eventdtarray['0'];
- $mo = intval($eventdtarray['1']);
- $day = intval($eventdtarray['2']);
-
-if($yr != $current_year) :
-	$current_year = $yr;
-	$current_month = 0;
-	$current_day = 0;
-	//$current_program = "";
-	$current_venue   = "";
+    if($yr != $current_year) 
+    {
+    	$current_year = $yr;
+    	$current_month = 0;
+    	$current_day = 0;
+    	//$current_program = "";
+    	$current_venue   = "";
+    }
+    if($mo != $current_month) 
+    {
+    	$current_month = $mo;
+    	$current_day = 0;
+    	//$current_program = "";
+    	$current_venue   = "";
+    	$monthname = $monthnames[$mo];
+    }
  ?>
-<?php endif; ?>
-		 
-<?php if($mo != $current_month) :
-	$current_month = $mo;
-	$current_day = 0;
-	//$current_program = "";
-	$current_venue   = "";
-	$monthname = $monthnames[$mo];
-?>
        <!-- start month -->
-<?php endif; ?>
-
     <div class="event" id="prog-<?php echo $showdata['id']; ?>">    <!-- start event -->
-
-<?php 
-    
+<?php
     $new_program = intval($showdata['artist_plain'] !== $current_program);
     if( $new_program > 0 )
     {
@@ -55,23 +51,6 @@ if($yr != $current_year) :
 					 . $showdata['program_genres'] . '</div><br>'; 
 	    echo "</div>";
     } ?>
-		<div class="embed-viewall">
-<?php
-        if( $showdata['cast_id'] > 0 )
-        {
- ?>         <a  title='display this show&#39;s cast' alt='display this show&#39;s cast'
-		        href='/about/company-collaborators/this-seasons-casts?show_id=<?php echo $showdata['id']; ?>' >
-		        <button class="viewall">Cast</button></a>
-<?php   }
-
-        if( $new_program > 0 )
-        {
-?>			<a title='open program description page' title='open program description page'
-			    href="/programs-repertoire/?program_id=<?php echo $showdata['artist_id']; ?>">
-			    <button class="viewall">program</button></a>
-<?php
-        } ?>
-        </div> <!-- prog-note-toggle shown in wptouch -->	
         
         <div class="gig-date">
 <?php   
@@ -145,10 +124,24 @@ if($yr != $current_year) :
 	}
 ?> 
 	</div> 
+	
+	<br style="clear:both;"> <!-- start gig-note -->
+	
+	<div class="embed-viewall">
+<?php
+    if( $showdata['cast_id'] > 0 )
+        echo "<a  title='display this show&#39;s cast' alt='display this show&#39;s cast'"
+                . " href='/about/company-collaborators/this-seasons-casts?show_id=" . $showdata['id']
+                . "' class=viewall>Cast</a>";
+    if( $new_program > 0 )
+        echo "<a title='open program description page' title='open program description page'"
+                . " href='/programs-repertoire/?program_id=" . $showdata['artist_id']
+                . "' class=viewall >program</a>";
+ ?>
+    </div>	
 
 	<?php if(!empty($showdata['notes'])
 		  or !empty($showdata['artist_url'])) : ?>
-		<br clear=both> <!-- start gig-note -->
 		<div class="gig-note" 
 		<?php echo ( 1 < $condensed ?  "style='display:none;'" : ""); ?>
 		        id="gignote-<?php echo $showdata['id']; ?>" >

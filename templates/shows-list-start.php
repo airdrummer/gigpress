@@ -9,17 +9,16 @@
 	$monthnames = array("0", "january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december");
 	$title_out = FALSE;
 
-	echo "<div class=top-viewall>";
     if( $program_id )
     {
+    	echo "<div class=top-viewall>";
         $scope_str = ($scope != 'past' ? "Upcoming" : "Past");
  
 		echo "<a href='/performances"
 		            . ( $scope == 'past' ? "/past-performances" : "") . "'"
                     . " title='view all " . $scope_str . " shows'"
-		            . "   alt='view all " . $scope_str . " shows' >"
-                    . "<button class='viewall'>All "
-                            . $scope_str . " shows</button></a>";
+		            . "   alt='view all " . $scope_str . " shows' "
+                    . " class='viewall' >All " . $scope_str . " shows</a>";
 
     	if ($program_id && $show_id) 
     	    echo "<a href='/about/company-collaborators/"
@@ -28,31 +27,31 @@
         	            : 'past-seasons-casts')
     		        . "/?program_id=" . $program_id . "'"
                     . " title='view past casts of this program'"
-                    . "   alt='view past casts of this program'" . " >"
-    		            . "<button class='viewall'>past casts</button></a>" ;
-    
+                    . "   alt='view past casts of this program'"
+    		            . " class='viewall'>past casts</a>";
+
     	if ( ($program_id && $show_id) || ($scope !== 'past'))
-            echo " <a href='/performances/past-performances/"
+            echo "<a href='/performances/past-performances/"
         	            . "?program_id=" . $program_id 
         	            . "&condensed=2" . "'" 
                     . " title='view past shows of this program'"
-                    . "   alt='view past shows of this program'" ." >"
-    		            . "<button class='viewall'>past shows</button></a>" ;
-        
+                    . "   alt='view past shows of this program'"
+    		            . " class='viewall'>past shows</a>";
+
     	if ( ($program_id && $show_id) || ($scope == 'past'))
-        	echo " <a href='/performances/"
+        	echo "<a href='/performances/"
         	            . "?program_id=" . $program_id 
         	            . "&condensed=1" . "'" 
                     . " title='view upcoming shows of this program'"
-                    . "   alt='view upcoming shows of this program'" ." >"
-    		            . "<button class='viewall'>upcoming shows</button></a>";
+                    . "   alt='view upcoming shows of this program'"
+    		            . " class='viewall'>upcoming shows</a>";
+        echo "</div>";
 
-        echo "<h3 class='gig-pup'><br>" 
+        echo "<h3 class='gig-pup'>" 
                         . ($show_id ? 'A' . ($scope != 'past' ? "n " : " ")
                                     : '') . $scope_str
                         . " performance" . ($show_id ? '' : 's')
                         . " of this program</h3>";
     }
-    echo "</div>";
  ?>
 <!-- end gigpress shows-list-start-->
