@@ -1,0 +1,49 @@
+<!--
+        $allow_initial_desktop_expand = true/false;
+        include GIGPRESS_PLUGIN_DIR . '/lib/toggle_details.php';
+-->
+<a id="toggle-all-cast" class="viewall button" 
+            data-initial-expand="<?php echo $allow_initial_desktop_expand 
+                                    ? 'true' : 'false'; ?>">
+        Open/Close All Bios
+</a>
+
+<script>
+jQuery(document).ready(function($) 
+{
+    const $rows = $('details.cast-member-row');
+    const $toggleBtn = $('#toggle-all-cast');
+    const mediaQuery = window.matchMedia('(max-width: 668px)');
+    
+    // Read the boolean flag processed on the server by PHP
+    const allowInitialExpand = $toggleBtn.data('initial-expand') === true;
+    let masterOpenState = false;
+
+    // 1. Initial Page Load Setup (Instant)
+    if (allowInitialExpand && !mediaQuery.matches) {
+        // MATCH: Target page + Desktop screen size = Auto Expand immediately
+        $rows.prop('open', true);
+        masterOpenState = true;
+    } else {
+        // FALLBACK: Wrong page OR narrow viewport screen size = Initialize Closed
+        $rows.prop('open', false);
+        masterOpenState = false;
+    }
+
+    // 2. Listen for width changing AFTER load (Strictly one-way trigger when narrowing)
+    mediaQuery.addEventListener('change', function(e) {
+        if (e.matches) {
+            // Instantly collapses all rows only when viewport scales down past 668px
+            $rows.prop('open', false);
+            masterOpenState = false;
+        }
+    });
+
+    // 3. Master button manual control override (Instant)
+    $toggleBtn.on('click', function() 
+    {
+        masterOpenState = !masterOpenState;
+        $rows.prop('open', masterOpenState);
+    });
+});
+</script>

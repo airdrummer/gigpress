@@ -48,7 +48,7 @@
 
         echo "</div>";
 
-        echo "<h3 class='gig-pup gig-instance'>" 
+        echo "<h3 class='gig-pup'>" 
                         . ($show_id ? 'A' . ($scope != 'past' ? "n " : " ")
                                     : '') . $scope_str
                         . " performance" . ($show_id ? '' : 's')
