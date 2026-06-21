@@ -40,10 +40,20 @@
 			<h2 class="progtitle" >
 			    <?php echo bc_bankhead($current_program); ?>
 		</h2></a>
+		
+	    <div class="prog-note"
+		    	 <?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
+			    id="prog-note-<?php echo $showdata['id']; ?>"> <!--  prog-note -->
 <?php
-    }
-        echo '<div class="gig-date">';
+            echo $showdata['program_notes'];
 
+			echo '<div class="floatright prog-genres" >'
+					 . $showdata['program_genres'] . '</div><br>'; 
+	    echo "</div>";
+    } ?>
+        
+        <div class="gig-date">
+<?php   
         if($day != $current_day) 
 		{
         	$current_day = $day;
@@ -88,14 +98,13 @@
             if(!empty($showdata['state'])) 
             	$loc .= ',&nbsp;' . $showdata['state'];
       		if(!empty($gpo['display_country'])
-		 		|| ($showdata['country'] != 'United States' ))
+		 		| ($showdata['country'] != 'United States' ))
 		 		$loc .= ', '.$showdata['country']; 
 		 	echo $loc; 
 		} ?>
     </div>
     
 	<div class="gig-tix" title='click to purchase tickets' > 
-
 <?php if(!empty($showdata['status']))
 	{
 		if( $showdata['status']== 'active'
@@ -125,23 +134,13 @@
                 . " href='/about/company-collaborators/this-seasons-casts?show_id=" . $showdata['id']
                 . "' class=viewall>Cast</a>";
     if( $new_program > 0 )
-        echo "<a title='open program description page' alt='open program description page'"
+        echo "<a title='open program description page' title='open program description page'"
                 . " href='/programs-repertoire/?program_id=" . $showdata['artist_id']
                 . "' class=viewall >program</a>";
  ?>
     </div>	
 
-	<div class="prog-note"
-		 <?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
-		    id="prog-note-<?php echo $showdata['id']; ?>"> <!--  prog-note -->
-<?php
-            echo $showdata['program_notes'];
-
-			echo '<div class="floatright prog-genres" >'
-					 . $showdata['program_genres'] . '</div><br>'; 
-	    echo "</div>";
-
-if(!empty($showdata['notes'])
+	<?php if(!empty($showdata['notes'])
 		  or !empty($showdata['artist_url'])) : ?>
 		<div class="gig-note" 
 		<?php echo ( 1 < $condensed ?  "style='display:none;'" : ""); ?>
@@ -151,7 +150,7 @@ if(!empty($showdata['notes'])
 				<a class="more-info" href="<?php echo $showdata['artist_url']; ?>" >read more...</a>
 			<?php endif; ?>	
 		</div>
-<?php endif; ?><!-- end gig-note -->
+	<?php endif; ?><!-- end gig-note -->
 
 <?php if($showdata['related_link']
 		&& !empty($gpo['relatedlink_notes'])) : ?>

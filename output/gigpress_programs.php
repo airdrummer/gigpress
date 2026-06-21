@@ -176,8 +176,6 @@ function gigpress_programs($atts = null, $content = null)
 			$showdata['genres']        = gigpress_artist_genre_string($program->artist_id);
 	
 			include gigpress_template('artists-list');
-
- 	        echo '<hr style="margin-top:1em; clear:both;">';
 		}
 	}
 	

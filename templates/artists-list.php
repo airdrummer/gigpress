@@ -1,5 +1,7 @@
 <!-- begin gigpress artist-list -->
 
+ 	<hr style="margin-top:1em; clear:both;">
+
 	<div class="gigpress-artist" id="program-<?php echo $showdata['artist_id']; ?>" >
 		<a title='click to show/hide program description'
 			href="#program-<?php echo $showdata['artist_id']; ?>"
