@@ -29,7 +29,7 @@
 		 		echo $no_results_message . wptexturize(" for ") 
 					 . "<h2 class=progtitle >" . wptexturize($program_name) . "</h2>";
 
-            	echo "<div class=embed-viewall>";
+            	echo "<br><div class=embed-viewall>";
             	
 				    echo "<a href='/programs-repertoire/?program_id=" . $program_id . "'"
 				                . " title='view program description'"
@@ -55,10 +55,10 @@
 	 	}
 	 	else
 	 		echo "<span class=error>invalid program id: " . $program_id . "</span>";
-	 }
-	 else
+	}
+	else
 		 echo $no_results_message;
+    echo '<hr></div>';
 ?>
 </div>
-<hr>
 <!-- end gigpress shows-list-empty-->

@@ -48,12 +48,12 @@ function render_cast_meta_box_callback( $post )
 	$saved_musicians = array_keys( $saved_cast_data );
 
 	$musicians = get_posts([
-		'post_type'      => 'musician',
-		'post_status'    => 'publish',
-		'orderby'        => 'title',
-		'order'          => 'ASC',
-		'posts_per_page' => -1
-	]);
+                    		'post_type'      => 'musician',
+                    		'post_status'    => 'publish', 
+                    		'orderby'        => 'title',
+                    		'order'          => 'ASC',
+                    		'posts_per_page' => -1
+                            ]);
 
 	echo '<div class="cast-meta-box-container">';
 	if ( ! empty( $musicians ) ) 
@@ -234,7 +234,7 @@ function show_title($show)
     $formatted_date = date_i18n( get_option( 'date_format' ), strtotime( $show->show_date ) );
     return sprintf(
         '<span class=show-title>%s</span>'
-        . ' <span class=show-venue>%s</span>'
+        . ' <span class=show-venue>%s,</span>'
         . ' <span class=show-date>%s</span>',
         $show->artist_name,
         $show->venue_name,
@@ -253,25 +253,10 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
                     $atts, 'cast_list' ));
  
     $past  = (bool) ($atts['past'] ?? false);
-
-	$click_what =  "click to display this "
-                    . ( ! $past ? "program" : "performance") . "&#39;s " 
-                    . (   $past ? "current season&#39;s" : "past seasons&#39;")
-                    . " casts" ; // for title links
- 	$what  = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
-    $where = sanitize_title($what); //-hardcoded path-\
-
     $show_id = intval(sanitize_text_field( $atts['show_id'] ));
 
     if ($show_id > 0)
-    {
-    	return "<div class='top-viewall'>"
-                    . "<h3 class='gig-pup'><br>Cast Of " 
-                             . ( $past ? "A Past" : "An Upcoming")
-                            . " performance of this program</h3>"
-            	."</div>"
-            . bc_musician_list($show_id, $past, true, false, $content);
-    }
+    	return bc_musician_list($show_id, $past, true, false, $content);
 
     global $wpdb;
 
@@ -288,17 +273,9 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 						) );
     ob_start();
     
-    echo  "<div class='top-viewall'><a class='viewall' href='/about/company-collaborators/" . $where . "'"
-                        . " title='click to display $click_what'"
-            			. "  alt='click to display $click_what'" . " >"
-            			    . $what . "</a></div>";
- 	if (! $shows )
+ 	if ($shows )
  	{
- 	    echo "<h3 class='gig-pup ctr'>-- no casts assigned --</h3>";
-	    return ob_get_clean();
- 	}
-
-	echo "<div class=" . ($past ? "past" : "upcoming") . "-casts>";
+    	echo "<div class=" . ($past ? "past" : "upcoming") . "-casts>";
 	
 	    $click_what =  "click to display this performance&#39;s cast"; // for title links
 	    $what = ( ! $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
@@ -325,9 +302,22 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 
 	        $previous_show = $show;	
 		}
+ 	    echo "</div>";
+	}
+ 	else
+ 	    echo "<h3 class='gig-pup ctr'>-- no casts assigned --</h3>";
 
-	echo "</div>";
-	
+	$click_what =  "click to display this "
+                    . ( $past ? "program" : "performance") . "&#39;s " 
+                    . ( $past ? "current season&#39;s" : "past seasons&#39;")
+                    . " casts" ; // for title links
+ 	$what  = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
+    $where = sanitize_title($what); //-hardcoded path-\
+    echo  "<div class='top-viewall'><a class='viewall' href='/about/company-collaborators/" . $where . "'"
+                        . " title='$click_what'"
+            			. "  alt='$click_what'" . " >"
+            			    . $what . "</a></div>";
+
 	return ob_get_clean();
 }
 add_shortcode( 'upcoming_casts', 'bc_list_upcoming_casts_shortcode' );
@@ -335,7 +325,7 @@ add_shortcode( 'upcoming_casts', 'bc_list_upcoming_casts_shortcode' );
 function get_gigpress_show_title_cast_ids( $show_id, $past = false) : array
 {
 	if( ! $show_id )
-    	return ['no show id', 0, 0, 0];
+    	return ['-- no show id --', 0, 0, 0];
 
     global $wpdb;
     // Query the show details along with its corresponding artist and venue
@@ -354,18 +344,16 @@ function get_gigpress_show_title_cast_ids( $show_id, $past = false) : array
 	{
 		$show = $wpdb->get_row(
 					$wpdb->prepare(
-			        "   SELECT s.show_date, a.artist_id, a.artist_name, v.venue_name
+			            "SELECT s.show_date, s.cast_id, s.assist_id,a.artist_id, a.artist_name, v.venue_name
 					        FROM " . GIGPRESS_SHOWS . " AS s"
 							. " LEFT JOIN " . GIGPRESS_ARTISTS . " AS a ON s.show_artist_id = a.artist_id"
 						         . " LEFT JOIN " . GIGPRESS_VENUES . " AS v ON s.show_venue_id = v.venue_id"
 						. " WHERE s.show_id = %d ;",
-					intval( $show_id )));
+					    intval( $show_id )));
 		if ( ! $show )
-    		return ["invalid show id", 0, 0, 0]; // this shouldn't happen, as show_id is passed in from valid query
-
-    	return [show_title($show), intval( $show->artist_id ), 0, 0];
+    		return ["-- invalid show id: $show_id --", 0, 0, 0]; // this shouldn't happen, as show_id is passed in from valid query
     }
-    
+
     return [show_title($show), intval( $show->artist_id ), intval( $show->cast_id ), intval( $show->assist_id )];
 }
 

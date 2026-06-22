@@ -122,7 +122,14 @@
 <?php
     if( $showdata['cast_id'] > 0 )
         echo "<a  title='display this show&#39;s cast' alt='display this show&#39;s cast'"
-                . " href='/about/company-collaborators/this-seasons-casts?show_id=" . $showdata['id']
+                . " href='/about/company-collaborators/"
+                    . sanitize_title(( $scope != 'past' 
+                                        ? "this season&#39;s" 
+                                        : "past seasons&#39;") 
+                                    . " casts")
+                . "?show_id=" . $showdata['id'] . "'"
+                    . " title='view this performance&#39;s cast'"
+                    . "   alt='view this performance&#39;s cast'"
                 . "' class=viewall>Cast</a>";
     if( $new_program > 0 )
         echo "<a title='open program description page' alt='open program description page'"

@@ -10,6 +10,7 @@ function gp_add_query_vars($qVars) //  shortcode atts are lowercase
         $qVars[] = "artist_order";
         $qVars[] = "genres";
         $qVars[] = "logic";
+        $qVars[] = "condensed";
         return $qVars;
 }
 // hook add_query_vars function into query_vars
@@ -40,6 +41,7 @@ function gigpress_programs($atts = null, $content = null)
 						'exclude'      => FALSE,
 						'artist_order' => 'alpha',
 						'logic'        => 'OR',
+			            'condensed'    => 0, // >0 = hide program descr.div
 						'genres'       => FALSE
 						), 
 					$atts,
@@ -49,7 +51,7 @@ function gigpress_programs($atts = null, $content = null)
 		$atts['program_id'] = $atts['artist'];
 	if($atts['program_id'])
 		$atts['program_id'] = absint($atts['program_id']);
-		
+
     $excluded_ids    = $atts['exclude'] 
     						? explode(",",sanitize_text_field($atts['exclude'])) 
     						: array();
@@ -59,7 +61,8 @@ function gigpress_programs($atts = null, $content = null)
 	$logic			 = ($atts['logic'] && strtoupper($atts['logic']) === 'AND') 
 							? 'AND' 
 							: 'OR';
-        
+    $condensed = intval($atts['condensed']);
+
 	ob_start(); // here b/c $content
 	
 	include gigpress_template('artists-search-form');

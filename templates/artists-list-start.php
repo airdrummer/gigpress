@@ -12,13 +12,15 @@
 			foreach($programs as $program) 
 				if (in_array($program->artist_id, $excluded_ids))
 						--$n;
-		echo "<h4 class=search-results>" 
+	    echo '<div class="embed-viewall">';
+		echo "<h3 class='gig-pup search-results'>" 
 		    . ($n   ? $n . " program" . ($n >1 ? "s" : '')
 			       	: "no programs")
 		    . " matching '" . implode("' " . strtolower($logic) . " '",
 					                array_merge($srchstrgs, $selected_genres))
-            . "'</h4>";
-	 	echo '<button style="float:right;" onclick="openSearch(\'genre\');">search again</button>';
+            . "'</h3>&nbsp;";
+	 	echo '<a class="viewall" href=# onclick="openSearch(\'genre\');">search again</a>';
+        echo "</div>";
 	}
 ?>
 <!-- end gigpress artist-list-start-->

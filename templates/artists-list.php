@@ -10,25 +10,18 @@
 <?php
 		if(!empty($showdata['program_notes']))
 		{
-			echo '<div class="prog-note" id="prog-note-' . $showdata['artist_id'] . '" > <!-- start prog-note -->';
+			echo '<div class="prog-note" ' . ( 0 < $condensed ?  " style='display:none;'" : "")
+			        .' id="prog-note-' . $showdata['artist_id'] . '" > <!-- start prog-note -->';
 			echo $showdata['program_notes'];
 			if(!empty($gpo['artist_link'])
 		  	&& !empty($showdata['artist_url'])
 		  	&& (strpos($showdata['artist_url'],"#program-" . $showdata['artist_id']) === false))
 				echo '&nbsp;&nbsp;&nbsp;<a class="more-info" href="' . esc_url($showdata['artist_url']) . '"'
                         . gigpress_target($showdata['artist_url']) . '>read more...</a>';
+		    if(!empty($showdata['genres']))
+		    	echo "<div class='floatright prog-genres'>" . $showdata['genres'] . "</div><br>";
 			echo '</div>';
 		}
-
-		if(!empty($showdata['genres']))
-			echo "<div class='floatright prog-genres'>" . $showdata['genres'] . "</div><br>";
-
-		echo '<div class="embed-viewall">';	
-    		echo '<a href="/performances/?condensed=1&program_id=' . $showdata['artist_id']
-				  . '" class=viewall >Upcoming&nbsp;Performances</a>';
-    		echo '<a href="/performances/past-performances/?condensed=1&program_id=' . $showdata['artist_id']
-				  . '" class=viewall >Past&nbsp;Performances</a>';
-        echo "</div>";
 
 		if(!empty($gpo['display_subscriptions']))
 		{
@@ -41,7 +34,17 @@
     			     . '<img src="'. plugins_url('/gigpress/images/icalendar-icon.gif') . '" /></a>';
 			echo '</div>';
 		}
+		
+		echo '<div class="embed-viewall">';	
+    		echo '<a href="/performances/?condensed=1&program_id=' . $showdata['artist_id'] . '"'
+                    . " title='display this program&#39;s Upcoming&nbsp;Performances'"
+                    . "   alt='display this program&#39;s Upcoming&nbsp;Performances'"
+			        . ' class=viewall >Upcoming&nbsp;Performances</a>';
+    		echo '<a href="/performances/past-performances/?condensed=1&program_id=' . $showdata['artist_id'] . '"'
+                    . " title='display this program&#39;s Past&nbsp;Performances'"
+                    . "   alt='display this program&#39;s Past&nbsp;Performances'"
+				    . ' class=viewall >Past&nbsp;Performances</a>';
+        echo "</div>";
+
 ?>
-<br clear=both>
-	</div>
-<!-- end gigpress artist-list -->
+	</div> <!-- end gigpress artist-list -->

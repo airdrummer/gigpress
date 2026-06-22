@@ -56,11 +56,15 @@ add_shortcode( 'musician_list', 'bc_musician_list_shortcode' );
 
 function bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desktop_expand, $content ) 
 {
+    $post_status = array('publish');
+    if ($past) // pending==not active, but still might be in a cast
+        $post_status[] = 'pending';
+
     $args = array(
-        'post_type'      => 'musician',
-        'post_status'    => 'publish',
-        'posts_per_page' => -1
-    );
+                    'post_type'      => 'musician',
+                    'post_status'    =>  $post_status,
+                    'posts_per_page' => -1
+                 );
 
     ob_start();
 
