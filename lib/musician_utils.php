@@ -46,19 +46,21 @@ function bc_musician_list_shortcode( $atts, $content=null )
 
 	$show_id                      = intval(strtolower(sanitize_text_field( $atts['show_id'] )));
 	$program_id                   = intval(strtolower(sanitize_text_field( $atts['program_id'] )));
-	$past                         = (bool) ($atts['past'] ?? false);
+	$past                         = intval(strtolower(sanitize_text_field( $atts['past'] )));
 	$revealheadshot               = (bool) ($atts['revealheadshot'] ?? false);
 	$allow_initial_desktop_expand = (bool) ($atts['allow_initial_desktop_expand'] ?? false);
 
-	return bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desktop_expand, $content );
+	return $content . bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desktop_expand, $content );
 }
 add_shortcode( 'musician_list', 'bc_musician_list_shortcode' );
 
 function bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desktop_expand, $content ) 
 {
     $post_status = array('publish');
-    if ($past) // pending==not active, but still might be in a cast
-        $post_status[] = 'pending';
+    if ($past > 1)
+        $post_status = array('pending');  // show only pending==not active
+    else if ($past) // pending==not active, but still might be in a past cast
+        $post_status[] = 'pending';  // show both, as some still might be in a past cast
 
     $args = array(
                     'post_type'      => 'musician',

@@ -13,7 +13,7 @@ add_action( 'acf/include_fields', function() {
 			'name' => 'first_name',
 			'aria-label' => '',
 			'type' => 'text',
-			'instructions' => '',
+			'instructions' => 'if you want to hide first name (to sort Boston City Singers on Boston, not Singers) enter "&amp;nbsp;" in 1st name.',
 			'required' => 1,
 			'conditional_logic' => 0,
 			'wrapper' => array(
@@ -34,7 +34,7 @@ add_action( 'acf/include_fields', function() {
 			'name' => 'last_name',
 			'aria-label' => '',
 			'type' => 'text',
-			'instructions' => '',
+			'instructions' => 'publish for active musicians, pending for inactive',
 			'required' => 1,
 			'conditional_logic' => 0,
 			'wrapper' => array(
@@ -63,7 +63,7 @@ add_action( 'acf/include_fields', function() {
 	'position' => 'acf_after_title',
 	'style' => 'default',
 	'label_placement' => 'left',
-	'instruction_placement' => 'label',
+	'instruction_placement' => 'field',
 	'hide_on_screen' => array(
 		0 => 'excerpt',
 		1 => 'discussion',
