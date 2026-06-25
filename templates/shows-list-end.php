@@ -42,6 +42,6 @@
         echo "</div>";
     }
 
-	include GIGPRESS_PLUGIN_DIR . '/scripts/showInfo-js.html';
+	include GIGPRESS_PLUGIN_DIR . '/scripts/showInfo.js';
  ?>
 <!-- end gigpress show-list-end  -->

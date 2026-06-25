@@ -179,8 +179,3 @@ p.gp-trash {
 		width: auto;
 	}
 }
-
-tr.gigpress-active img
-{
-    max-width:150px!important; /** so images in show & program notes fit */
-}

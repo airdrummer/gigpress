@@ -12,7 +12,7 @@
 		            . " class='viewall button'>view all programs</a></div>";
 	}
 	
-	include GIGPRESS_PLUGIN_DIR . '/scripts/showInfo-js.html';
+	include GIGPRESS_PLUGIN_DIR . '/scripts/showInfo.js';
 
 ?>
 <!-- end gigpress artist-list-end -->

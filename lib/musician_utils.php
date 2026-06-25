@@ -127,7 +127,7 @@ function bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desk
 
     echo '</div>';
         
-include GIGPRESS_PLUGIN_DIR . '/lib/toggle_details.html';
+include GIGPRESS_PLUGIN_DIR . '/scripts/toggle-details.js';
 
     return ob_get_clean();
 }

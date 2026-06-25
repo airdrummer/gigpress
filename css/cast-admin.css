@@ -1,0 +1,75 @@
+<?php
+//        cast/musician/instrument entry
+//        include GIGPRESS_PLUGIN_DIR . '/css/cast-admin.css';
+ ?>
+<style type="text/css">
+tr.gigpress-active img
+{
+    max-width:150px!important; /** so images in show & program notes fit */
+}
+.musician-cast-row
+{
+    margin-bottom: 25px;
+    display: flex;
+}
+.musician-entry 
+{
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    margin-bottom: 8px;
+    margin-right: 12px;
+}
+.musician-checkbox-label
+{
+    font-weight: bold; 
+    cursor: pointer;
+    min-width: 150px;
+}
+.musician-order-label
+{
+    font-size: 12px; 
+    color: #666;
+}
+.instrument-order-label input,
+.musician-order-label input
+{
+    width: 60px; 
+    padding: 2px 4px; 
+    height: 24px; 
+    text-align: center;
+}
+.instruments-sub-list
+{
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 8px;
+}
+.instrument-entry
+{
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    background: #fafafa; 
+    padding: 4px 8px; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 3px;
+}
+.instrument-entry-label
+{
+    font-size: 12px; 
+    color: #555; 
+    cursor: pointer; 
+    flex-grow: 1; 
+    display: inline-block;
+    min-width: 90px;
+}
+.cast_instrument_order
+{
+    width: 45px; 
+    font-size: 11px; 
+    padding: 1px 3px; 
+    height: 20px; 
+    text-align: center;
+}
+</style>

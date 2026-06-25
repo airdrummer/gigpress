@@ -1,6 +1,6 @@
 <!--
         $allow_initial_desktop_expand = true/false;
-        include GIGPRESS_PLUGIN_DIR . '/lib/toggle_details.php';
+        include GIGPRESS_PLUGIN_DIR . '/js/toggle-details.js';
 -->
 <a id="toggle-all-cast" class="viewall button" 
             data-initial-expand="<?php echo $allow_initial_desktop_expand 
@@ -8,7 +8,7 @@
         Open/Close All Bios
 </a>
 
-<script>
+<script type="text/javascript">
 jQuery(document).ready(function($) 
 {
     const $rows = $('details.cast-member-row');

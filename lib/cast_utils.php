@@ -21,6 +21,7 @@ function register_casts_custom_post_type() {
     $args = [
         "label"               => esc_html__( "Casts", "boston-camerata" ),
         "labels"              => $labels,
+		"description" => "only active musicians may be selected; inactives will still appear in past casts",
         "public"              => false, // Kept internal/admin-facing by default
         "show_ui"             => true,
         "show_in_menu"        => true,
@@ -41,6 +42,8 @@ add_action( 'init', 'register_casts_custom_post_type' );
  */
 function render_cast_meta_box_callback( $post ) 
 {
+        include GIGPRESS_PLUGIN_DIR . '/css/cast-admin.css';
+
 	wp_nonce_field( 'save_cast_meta_action', 'cast_meta_box_nonce' );
 
 	// Fetch the updated structured cast meta array
@@ -55,7 +58,12 @@ function render_cast_meta_box_callback( $post )
                     		'posts_per_page' => -1
                             ]);
 
-	echo '<div class="cast-meta-box-container">';
+    echo '<div class="cast-meta-box-controls" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee;">';
+    echo '    <button type="button" id="bc-toggle-saved" class="button button-secondary">Show Selected Only</button>';
+    echo '</div>';
+
+    echo '<div class="musician-list-container">';
+    
 	if ( ! empty( $musicians ) ) 
 	{
 		foreach ( $musicians as $musician ) 
@@ -65,50 +73,69 @@ function render_cast_meta_box_callback( $post )
 			$musician_order = isset( $musician_meta['musician_order'] ) ? intval( $musician_meta['musician_order'] ) : 0;
 			$saved_inst_weights = isset( $musician_meta['instruments'] ) ? $musician_meta['instruments'] : [];
 			
-			echo '<div class="musician-cast-row" style="margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee;">';
+			echo '<div class="musician-cast-row">';
 				
 				// Master Musician Checkbox + Order Input
 				$musician_checked = in_array( $musician->ID, $saved_musicians ) ? 'checked' : '';
-				echo '<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 8px;">';
-					echo '<label style="font-weight: bold; cursor: pointer;">';
-						echo '<input type="checkbox" name="cast_musicians[]" class="musician-toggle" value="' . $musician->ID . '" ' . $musician_checked . '> ';
-						echo esc_html( $musician->post_title );
+				echo '<div class=musician-entry>';
+					echo '<label class=musician-checkbox-label>';
+						echo '<input type="checkbox" name="cast_musicians[]" class="musician-toggle" value="'
+					                                        . $musician->ID . '" ' . $musician_checked . '> ';
+				        echo esc_html( $musician->post_title );
 					echo '</label>';
-					echo '<label style="font-size: 12px; color: #666;">Musician Display Order: ';
-						echo '<input type="number" name="cast_musician_order[' . $musician->ID . ']" value="' . $musician_order . '" style="width: 60px; padding: 2px 4px; height: 24px; text-align: center;">';
+					echo '<label class=musician-order-label>';
+						echo '<input type="number" name="cast_musician_order['. $musician->ID . ']" value="'
+						                                                               . $musician_order . '">';
 					echo '</label>';
-				echo '</div>';
-
+                echo '</div>';
 				// Sub-list of Instruments + Individual Order Weights
 				if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) 
 				{
-					echo '<div class="instruments-sub-list" style="margin-left: 25px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">';
+					echo '<div class="instruments-sub-list">';
 					foreach ( $terms as $term ) 
 					{
-						$inst_checked = isset( $saved_inst_weights[ $term->term_id ] ) ? 'checked' : '';
-						$inst_order = isset( $saved_inst_weights[ $term->term_id ] ) ? intval( $saved_inst_weights[ $term->term_id ] ) : 0;
-						
-						echo '<div style="display: flex; align-items: center; justify-content: space-between; background: #fafafa; padding: 4px 8px; border: 1px solid #e2e8f0; border-radius: 3px;">';
-							echo '<label style="font-size: 12px; color: #555; cursor: pointer; flex-grow: 1; display: inline-block;">';
-								echo '<input type="checkbox" name="cast_instruments[' . $musician->ID . '][]" class="instrument-toggle" value="' . $term->term_id . '" ' . $inst_checked . '> ';
+						$inst_checked = isset( $saved_inst_weights[ $term->term_id ] ) 
+						                        ? 'checked' : '';
+						$inst_order = isset( $saved_inst_weights[ $term->term_id ] ) 
+						                        ? intval( $saved_inst_weights[ $term->term_id ] ) : 0;
+						echo '<div class=instrument-entry>';
+							echo '<label class=instrument-entry-label>';
+								echo '<input type="checkbox" class="instrument-toggle"'
+								            . ' name="cast_instruments[' . $musician->ID . '][]"' 
+								            . ' value="' . $term->term_id . '" ' . $inst_checked . '> ';
 								echo esc_html( $term->name );
 							echo '</label>';
-							echo '<input type="number" name="cast_instrument_order[' . $musician->ID . '][' . $term->term_id . ']" value="' . $inst_order . '" placeholder="0" style="width: 45px; font-size: 11px; padding: 1px 3px; height: 20px; text-align: center;">';
-						echo '</div>';
+					        echo '<label class=instrument-order-label>';
+							    echo '<input type="number" class=cast_instrument_order' 
+							        . ' name="cast_instrument_order[' . $musician->ID . '][' . $term->term_id . ']"'
+							        . ' value="' . $inst_order . '" placeholder="0" >';
+							echo '</label>';
+ 						echo '</div>';
 					}
-					echo '</div>';
+				    echo '</div>';
 				}
 			echo '</div>';
 		}
 	}
-	echo '</div>';
+	echo '</div>';  // musician-list-container
+    
+    include GIGPRESS_PLUGIN_DIR . '/scripts/toggle-musicians.js';
 
 	add_action( 'admin_print_footer_scripts', 'inject_cast_meta_box_auto_toggle_js' );
 }
 /**
  * Register the Custom Cast Meta Box.
  */
-function register_cast_meta_box() {
+function register_cast_meta_box() 
+{
+    add_meta_box(
+        'cast_musician_instructions', // Unique ID for the meta box
+        __('select cast members, entering desired musician & instrument display orders', 'text-domain' ),   // Title of the meta box
+        'cast_musician_instructions_meta_box', // Callback function to display content
+        'cast',               // Post type (e.g., 'post', 'page', or custom post type)
+        'normal',             // Context (position on the edit screen: 'normal', 'side', or 'advanced')
+        'high'                // Priority (display order: 'high', 'core', 'default', 'low')
+    );
 	add_meta_box(
 		'cast_meta_box_id',                  // Unique ID for the meta box container HTML
 		__( 'Cast Members & Instruments', 'text-domain' ), // Visible Title of the meta box
@@ -120,6 +147,11 @@ function register_cast_meta_box() {
 }
 // Hook the registration execution loop into the WordPress backend admin pool
 add_action( 'add_meta_boxes', 'register_cast_meta_box' );
+
+function cast_musician_instructions_meta_box( $post ) 
+{
+    echo '<p><b>Note:</b> only active musicians will appear here; inactives will still appear in past cast listings</p>';
+}
 
 /**
  * Inject jQuery automation handlers cleanly into the WordPress admin footer pool.
@@ -430,7 +462,7 @@ function bc_enforce_relational_integrity_constraints( $post_id )
 					esc_html( get_the_title( $post_id ) ),
 					esc_url( get_edit_post_link( $meta->post_id ) ),
 					esc_html( $cast_title )
-				), '', [ 'back_link' => true ] );
+				        ), '', [ 'back_link' => true ] );
 			}
 		}
 	}
@@ -458,6 +490,7 @@ function bc_enforce_relational_integrity_constraints( $post_id )
 						. '<p>The Cast <strong>%s</strong> cannot be removed because it is assigned to <a target=_blank href=/2021site/wp-admin/admin.php?page=gigpress&gpaction=edit&show_id=%d>Show #%d</a>.</p>'
 						. '<p>Please remove that show cast assignment to allow cast deletion.</p>', 'boston-camerata' ),
 					esc_html( get_the_title( $post_id ) ),
+					intval( $linked_show_id ),
 					intval( $linked_show_id )
 				), '', [ 'back_link' => true ] );
 			}
