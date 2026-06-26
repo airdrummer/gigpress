@@ -84,7 +84,7 @@ function render_cast_meta_box_callback( $post )
             
             return $order_a <=> $order_b;
         }
-    
+        
         // 4. If NEITHER are saved, maintain a clean alphabetical fallback by title
         return strcasecmp( $a->post_title, $b->post_title );
     });
@@ -105,8 +105,8 @@ function render_cast_meta_box_callback( $post )
 			$musician_order = intval( $musician_meta['musician_order'] ) ?: $index;
             $terms = wp_get_object_terms( $m_id, 'instrument' );
 			$saved_inst_weights = $musician_meta['instruments'] ?: [];
-			$musician_checked = in_array( $m_id, $saved_musicians ) ? 'checked' : '';
-			
+			$musician_checked = isset( $saved_cast_data[ $m_id ] ) ? 'checked' : '';
+
 			echo '<div class="musician-cast-row">';
                 echo '<span class="dashicons dashicons-menu drag-handle" ></span>';
 				
@@ -267,10 +267,11 @@ function save_cast_meta_data_handler( $post_id )
 				asort( $m_instruments, SORT_NUMERIC );
 			}
 
-			$clean_cast_data[ $m_id ] = [
-				'musician_order' => $m_order,
-				'instruments'    => $m_instruments
-			];
+            if ( ! empty( $m_instruments ) ) 
+    			$clean_cast_data[ $m_id ] = [
+                            				'musician_order' => $m_order,
+                            				'instruments'    => $m_instruments
+                                			];
 		}
 
 		// Sort structural musician parent nodes by their weight values
