@@ -37,6 +37,15 @@ function register_casts_custom_post_type() {
 }
 add_action( 'init', 'register_casts_custom_post_type' );
 
+function bc_enqueue_admin_sortable_scripts($hook) 
+{
+    // Only load on post editing pages to keep the admin clean
+    if ($hook === 'post.php' || $hook === 'post-new.php') {
+        wp_enqueue_script('jquery-ui-sortable');
+    }
+}
+add_action('admin_enqueue_scripts', 'bc_enqueue_admin_sortable_scripts');
+
 /**
  * 2. CAST CONFIGURATION META BOX (Musicians + Subsets of Instruments with Custom Orders)
  */
@@ -57,37 +66,61 @@ function render_cast_meta_box_callback( $post )
                     		'order'          => 'ASC',
                     		'posts_per_page' => -1
                             ]);
+    usort( $musicians, function( $a, $b ) use ( $saved_cast_data ) 
+    {
+        // 1. Check strict presence in the saved matrix
+        $is_saved_a = isset( $saved_cast_data[ $a->ID ] );
+        $is_saved_b = isset( $saved_cast_data[ $b->ID ] );
+    
+        // 2. Priority Rule: Saved items ALWAYS go above unsaved items
+        if ( $is_saved_a && ! $is_saved_b ) return -1; 
+        if ( ! $is_saved_a && $is_saved_b ) return 1;  
+    
+        // 3. If BOTH are saved, sort strictly by their numeric weights (safely handles 0)
+        if ( $is_saved_a && $is_saved_b ) 
+        {
+            $order_a = intval( $saved_cast_data[ $a->ID ]['musician_order'] ) ?: 0;
+            $order_b = intval( $saved_cast_data[ $b->ID ]['musician_order'] ) ?: 0;
+            
+            return $order_a <=> $order_b;
+        }
+    
+        // 4. If NEITHER are saved, maintain a clean alphabetical fallback by title
+        return strcasecmp( $a->post_title, $b->post_title );
+    });
 
     echo '<div class="cast-meta-box-controls" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #eee;">';
     echo '    <button type="button" id="bc-toggle-saved" class="button button-secondary">Show Selected Only</button>';
     echo '</div>';
 
-    echo '<div class="musician-list-container">';
-    
+    echo '<div class="musician-list-container" id="bc-sortable-cast">';
+
 	if ( ! empty( $musicians ) ) 
 	{
-		foreach ( $musicians as $musician ) 
+        foreach ( $musicians as $index => $musician )
 		{
-			$terms = wp_get_object_terms( $musician->ID, 'instrument' );
-			$musician_meta = isset( $saved_cast_data[ $musician->ID ] ) ? $saved_cast_data[ $musician->ID ] : [];
-			$musician_order = isset( $musician_meta['musician_order'] ) ? intval( $musician_meta['musician_order'] ) : 0;
-			$saved_inst_weights = isset( $musician_meta['instruments'] ) ? $musician_meta['instruments'] : [];
+            $m_id = intval($musician->ID);
+            // Read the current state from your saved array
+			$musician_meta = $saved_cast_data[ $m_id ] ?: [];
+			$musician_order = intval( $musician_meta['musician_order'] ) ?: $index;
+            $terms = wp_get_object_terms( $m_id, 'instrument' );
+			$saved_inst_weights = $musician_meta['instruments'] ?: [];
+			$musician_checked = in_array( $m_id, $saved_musicians ) ? 'checked' : '';
 			
 			echo '<div class="musician-cast-row">';
+                echo '<span class="dashicons dashicons-menu drag-handle" ></span>';
 				
 				// Master Musician Checkbox + Order Input
-				$musician_checked = in_array( $musician->ID, $saved_musicians ) ? 'checked' : '';
-				echo '<div class=musician-entry>';
-					echo '<label class=musician-checkbox-label>';
-						echo '<input type="checkbox" name="cast_musicians[]" class="musician-toggle" value="'
-					                                        . $musician->ID . '" ' . $musician_checked . '> ';
+			    echo '<div class=musician-entry>';
+				    echo '<label class=musician-checkbox-label>';
+					    echo '<input type="checkbox" name="cast_musicians[]" class="musician-toggle" value="'
+					                                        . $m_id . '" ' . $musician_checked . '> ';
 				        echo esc_html( $musician->post_title );
-					echo '</label>';
-					echo '<label class=musician-order-label>';
-						echo '<input type="number" name="cast_musician_order['. $musician->ID . ']" value="'
-						                                                               . $musician_order . '">';
-					echo '</label>';
+				    echo '</label>';
+                    echo '<input type="hidden" class="musician-order-input" name="cast_musician_order[' . $m_id . ']" value="'
+						                                              . $musician_order . '">';
                 echo '</div>';
+
 				// Sub-list of Instruments + Individual Order Weights
 				if ( ! is_wp_error( $terms ) && ! empty( $terms ) ) 
 				{
@@ -130,7 +163,7 @@ function register_cast_meta_box()
 {
     add_meta_box(
         'cast_musician_instructions', // Unique ID for the meta box
-        __('select cast members, entering desired musician & instrument display orders', 'text-domain' ),   // Title of the meta box
+        __('select cast members, dragging into desired order, and instruments  & instrument display orders', 'text-domain' ),   // Title of the meta box
         'cast_musician_instructions_meta_box', // Callback function to display content
         'cast',               // Post type (e.g., 'post', 'page', or custom post type)
         'normal',             // Context (position on the edit screen: 'normal', 'side', or 'advanced')
@@ -150,7 +183,7 @@ add_action( 'add_meta_boxes', 'register_cast_meta_box' );
 
 function cast_musician_instructions_meta_box( $post ) 
 {
-    echo '<p><b>Note:</b> only active musicians will appear here; inactives will still appear in past cast listings</p>';
+    echo '<p><b>Note:</b> only active (published) musicians will appear here; inactives (pending) will still appear in past cast listings</p>';
 }
 
 /**

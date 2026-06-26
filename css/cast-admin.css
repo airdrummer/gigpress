@@ -18,21 +18,15 @@ tr.gigpress-active img
     align-items: center; 
     gap: 15px; 
     margin-bottom: 8px;
-    margin-right: 12px;
+    margin-right: 16px;
 }
 .musician-checkbox-label
 {
     font-weight: bold; 
     cursor: pointer;
-    min-width: 150px;
+    min-width: 180px;
 }
-.musician-order-label
-{
-    font-size: 12px; 
-    color: #666;
-}
-.instrument-order-label input,
-.musician-order-label input
+.instrument-order-label input
 {
     width: 60px; 
     padding: 2px 4px; 
@@ -72,4 +66,11 @@ tr.gigpress-active img
     height: 20px; 
     text-align: center;
 }
+.drag-handle
+{
+    cursor:grab; 
+    color:#a0a5aa; 
+    margin-right:10px;
+}
+
 </style>
