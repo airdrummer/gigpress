@@ -163,7 +163,7 @@ function register_cast_meta_box()
 {
     add_meta_box(
         'cast_musician_instructions', // Unique ID for the meta box
-        __('select cast members, dragging into desired order, and instruments  & instrument display orders', 'text-domain' ),   // Title of the meta box
+        __('select cast members, drag into desired order, and select at least 1 instrument, setting desired display order', 'text-domain' ),   // Title of the meta box
         'cast_musician_instructions_meta_box', // Callback function to display content
         'cast',               // Post type (e.g., 'post', 'page', or custom post type)
         'normal',             // Context (position on the edit screen: 'normal', 'side', or 'advanced')
@@ -191,45 +191,7 @@ function cast_musician_instructions_meta_box( $post )
  */
 function inject_cast_meta_box_auto_toggle_js() 
 {
-	// Verify we are working on the proper screen context matrix
-	$screen = get_current_screen();
-	if ( ! $screen || $screen->post_type !== 'cast' ) {
-		return;
-	}
-	?>
-	<script id=cast_meta_box_auto_toggle_js type="text/javascript">
-		jQuery(document).ready(function($) {
-			
-			// 1. DIRECTION A: Selecting instruments selects/unselects the musician row automatically
-			$('.cast-meta-box-container').on('change', '.instrument-toggle', function() {
-				var $row = $(this).closest('.musician-cast-row');
-				var $musicianCheckbox = $row.find('.musician-toggle');
-				
-				// Count how many instruments are currently checked inside this specific row context
-				var checkedInstrumentsCount = $row.find('.instrument-toggle:checked').length;
-				
-				if (checkedInstrumentsCount > 0) {
-					// If at least one instrument is selected, ensure the parent musician stays checked
-					$musicianCheckbox.prop('checked', true);
-				} else {
-					// If all instruments are cleared out, completely uncheck the parent musician
-					$musicianCheckbox.prop('checked', false);
-				}
-			});
-
-			// 2. DIRECTION B: (UX Safeguard) If manually unchecking a musician, clear all their sub-selections
-			$('.cast-meta-box-container').on('change', '.musician-toggle', function() {
-				var $row = $(this).closest('.musician-cast-row');
-				
-				// If a content administrator turns off a musician entirely, clear down all sub-toggles
-				if (!this.checked) {
-					$row.find('.instrument-toggle').prop('checked', false);
-				}
-			});
-			
-		});
-	</script>
-<?php
+    include GIGPRESS_PLUGIN_DIR . '/scripts/auto-toggle-musicians.js';
 }
 
 function save_cast_meta_data_handler( $post_id ) 

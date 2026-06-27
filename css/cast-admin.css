@@ -3,6 +3,7 @@
 //        include GIGPRESS_PLUGIN_DIR . '/css/cast-admin.css';
  ?>
 <style type="text/css">
+
 tr.gigpress-active img
 {
     max-width:150px!important; /** so images in show & program notes fit */
@@ -26,46 +27,39 @@ tr.gigpress-active img
     cursor: pointer;
     min-width: 180px;
 }
-.instrument-order-label input
-{
-    width: 60px; 
-    padding: 2px 4px; 
-    height: 24px; 
-    text-align: center;
-}
+
 .instruments-sub-list
 {
-    display: grid; 
-    grid-template-columns: repeat(3, 1fr); 
-    gap: 8px;
+    width: 100%;
 }
+
 .instrument-entry
 {
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    background: #fafafa; 
-    padding: 4px 8px; 
-    border: 1px solid #e2e8f0; 
+    background: #fafafa;
+    padding: 4px 8px;
+    border: 1px solid #e2e8f0;
     border-radius: 3px;
+    box-sizing: border-box;
+    float: left;
+    margin: 5px 0 5px 10px;
 }
+
 .instrument-entry-label
 {
-    font-size: 12px; 
     color: #555; 
     cursor: pointer; 
-    flex-grow: 1; 
     display: inline-block;
-    min-width: 90px;
+    white-space: nowrap;    /* Prevents instrument names from awkwardly breaking to 2 lines */
+    padding-right: 4px;
+    min-width: 130px;
 }
-.cast_instrument_order
+
+.instrument-order-label input
 {
-    width: 45px; 
-    font-size: 11px; 
-    padding: 1px 3px; 
-    height: 20px; 
-    text-align: center;
+    width: 50px; 
+    padding: 2px 4px; 
 }
+
 .drag-handle
 {
     cursor:grab; 

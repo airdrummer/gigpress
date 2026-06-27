@@ -956,7 +956,7 @@ function gigpress_import() {
 									'show_price' => gigpress_db_in(@$show['Price']),
 									'show_tix_url' => gigpress_db_in(@$show['Ticket URL'], FALSE),
 									'show_tix_phone' => gigpress_db_in(@$show['Ticket phone']),
-									'show_external_url' => gigpress_db_in(@$show['External URL']),
+									'show_external_url' => gigpress_db_in(@$show['External URL'], FALSE),
 									'show_notes' => gigpress_db_in(@$show['Notes'], FALSE),
 									'show_status' => (!empty($show['Status'])) ? gigpress_db_in($show['Status']) : 'active',
 									'show_related' => '0'

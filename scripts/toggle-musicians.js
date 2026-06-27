@@ -61,68 +61,6 @@ jQuery(document).ready(function($)
         // Refresh sortable structure maps so dragging hidden elements doesn't stutter
         $('#bc-sortable-cast').sortable('refresh');
     });
-    
-    // Intercept WordPress post submission to validate instruments
-    $('#post').on('submit', function(e) 
-    {
-        var validationFailed = false;
-        var $firstOffender = null;
-
-        // Loop through every checked musician row
-        $('.musician-cast-row').each(function() 
-        {
-            var $row = $(this);
-            var $musicianCheckbox = $row.find('input[name="cast_musicians[]"]');
-
-            if ($musicianCheckbox.is(':checked')) 
-            {
-                // Find any checked instrument checkboxes inside this specific row
-                // This targets inputs whose 'name' attribute contains 'cast_instruments'
-                var checkedInstrumentsCount = $row.find('input[name*="cast_instruments"]:checked').length;
-
-                if (checkedInstrumentsCount === 0) 
-                {
-                    validationFailed = true;
-                    $row.css({
-                        'border-color': '#d63638',
-                        'background-color': '#fcf0f1'
-                    });
-                    if (!$firstOffender)
-                        $firstOffender = $row;
-                } 
-                else 
-                {
-                    // Reset styling if they fixed it
-                    $row.css({
-                        'border-color': '#ccd0d4',
-                        'background-color': '#fff'
-                    });
-                }
-            }
-        });
-
-        if (validationFailed) 
-        {
-            // Stop the form from saving to the server
-            e.preventDefault();
-            
-            // Re-enable the default WordPress spinner/button states
-            $('#publish').removeClass('button-primary-disabled');
-            $('#save-post').removeClass('button-disabled');
-            $('.spinner').removeClass('is-active');
-
-            alert('Validation Error: Every musician selected for the cast must have at least one instrument assigned.');
-            
-            // Smoothly scroll up to the row that caused the issue
-            if ($firstOffender) {
-                $('html, body').animate({
-                    scrollTop: $firstOffender.offset().top - 100
-                }, 400);
-            }
-            
-            return false;
-        }
-    });
 
 });
 </script>

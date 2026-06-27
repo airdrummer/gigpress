@@ -87,11 +87,11 @@ function gigpress_add() {
 			$venue_phone = gigpress_db_out(gigpress_db_in($_POST['venue_phone']));
 			$new_tour_name = gigpress_db_out(gigpress_db_in($_POST['tour_name']));
 			$show_ages = gigpress_db_out(gigpress_db_in($_POST['show_ages']));
-			$show_tix_url = gigpress_db_out(gigpress_db_in($_POST['show_tix_url']));
+			$show_tix_url = gigpress_db_out(gigpress_db_in($_POST['show_tix_url'],false));
 			$show_tix_phone = gigpress_db_out(gigpress_db_in($_POST['show_tix_phone']));
 			$show_notes = gigpress_db_out(gigpress_db_in($_POST['show_notes'], false));
 			$show_price = gigpress_db_out(gigpress_db_in($_POST['show_price']));
-			$show_external_url = gigpress_db_out(gigpress_db_in($_POST['show_external_url']));
+			$show_external_url = gigpress_db_out(gigpress_db_in($_POST['show_external_url'],false));
 			$show_tour_id = absint($_POST['show_tour_id']);
 			$show_related = absint($_POST['show_related']);
 			$show_related_title = gigpress_db_out(gigpress_db_in($_POST['show_related_title']));
@@ -591,7 +591,7 @@ function gigpress_add() {
 				  <tr>
 					<th scope="row"><label for="show_notes"><?php _e("Notes", "gigpress") ?>:</label></th>
 					<td>
-						<textarea name="show_notes" id="show_notes" cols="45" rows="5"><?php if(isset($show_notes)) echo $show_notes; ?></textarea><br />
+						<textarea name="show_notes" id="show_notes" cols="45" rows="5" style="width:100%;" ><?php if(isset($show_notes)) echo $show_notes; ?></textarea><br />
 						<span class="description"><?php _e("Use this space to list other bands, 'presented by' info, etc", "gigpress"); ?></span>
 					</td>
 				  </tr>
