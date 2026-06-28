@@ -2,12 +2,9 @@
 //        cast/musician/instrument entry
 //        include GIGPRESS_PLUGIN_DIR . '/css/cast-admin.css';
  ?>
+
 <style type="text/css">
 
-tr.gigpress-active img
-{
-    max-width:150px!important; /** so images in show & program notes fit */
-}
 .musician-cast-row
 {
     margin-bottom: 25px;

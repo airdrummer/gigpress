@@ -289,6 +289,12 @@ function gigpress_admin_shows() {
 		<?php } ?>
 			</tbody>
 		</table>
+<style>
+tr.alternate img
+{
+    max-width:150px!important; /** so images in show notes fit */
+}
+</style>
 		<div class="tablenav">
 			<div class="alignleft">
                 <?php if ( 'deleted' !== $scope ) : ?>

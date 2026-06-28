@@ -19,7 +19,7 @@
 				echo '&nbsp;&nbsp;&nbsp;<a class="more-info" href="' . esc_url($showdata['artist_url']) . '"'
                         . gigpress_target($showdata['artist_url']) . '>read more...</a>';
 		    if(!empty($showdata['genres']))
-		    	echo "<div class='floatright prog-genres'>" . $showdata['genres'] . "</div><br>";
+		    	echo "<div class='floatright prog-genres'>" . $showdata['genres'] . "</div>";
 			echo '</div>';
 		}
 

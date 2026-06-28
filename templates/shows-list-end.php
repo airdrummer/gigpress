@@ -43,5 +43,7 @@
     }
 
 	include GIGPRESS_PLUGIN_DIR . '/scripts/showInfo.js';
+
+	include GIGPRESS_PLUGIN_DIR . '/lib/details-popup.html';
  ?>
 <!-- end gigpress show-list-end  -->
