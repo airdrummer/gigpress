@@ -292,7 +292,7 @@ function gigpress_admin_shows() {
 <style>
 tr.alternate img
 {
-    max-width:150px!important; /** so images in show notes fit */
+    max-width:150px!important; /** so images in show & program notes fit */
 }
 </style>
 		<div class="tablenav">

@@ -131,15 +131,12 @@
                     . " title='view this performance&#39;s cast'"
                     . "   alt='view this performance&#39;s cast'"
                 . "' class=viewall>Cast</a>";
-    if( $new_program > 0 )
-        echo "<a title='open program description page' alt='open program description page'"
-                . " href='/programs-repertoire/?program_id=" . $showdata['artist_id']
-                . "' class=viewall >program</a>";
  ?>
     </div>	
 
 	<div class="prog-note"
-		 <?php echo ( 0 < $condensed ?  "style='display:none;'" : ""); ?>
+		 <?php echo ( (0 < $condensed) || ( ! $new_program ) 
+		            ?  "style='display:none;'" : ""); ?>
 		    id="prog-note-<?php echo $showdata['id']; ?>"> <!--  prog-note -->
 <?php
             echo $showdata['program_notes'];
@@ -148,7 +145,7 @@
 					 . $showdata['program_genres'] . '</div><br>'; 
 	    echo "</div>";
 
-if(!empty($showdata['notes'])
+    if(!empty($showdata['notes'])
 		  or !empty($showdata['artist_url'])) : ?>
 		<div class="gig-note" 
 		<?php echo ( 1 < $condensed ?  "style='display:none;'" : ""); ?>
@@ -156,7 +153,7 @@ if(!empty($showdata['notes'])
 			<?php if(!empty($showdata['notes'])) echo $showdata['notes']; ?>
 			<?php if(!empty($showdata['artist_url'])) : ?>
 				<a class="more-info" href="<?php echo $showdata['artist_url']; ?>" >read more...</a>
-			<?php endif; ?>	
+	<?php endif; ?>	
 		</div>
 <?php endif; ?><!-- end gig-note -->
 
