@@ -116,61 +116,58 @@
 ?> 
 	</div> 
 	
-	<br style="clear:both;"> <!-- start gig-note -->
+	<br style="clear:both;"> 
 	
-	<div class="embed-viewall">
 <?php
+	echo '<div class="embed-viewall">';
     if( $showdata['cast_id'] > 0 )
         echo "<a  title='display this show&#39;s cast' alt='display this show&#39;s cast'"
                 . " href='/about/company-collaborators/"
                     . sanitize_title(( $scope != 'past' 
                                         ? "this season&#39;s" 
-                                        : "past seasons&#39;") 
+                                        : "past seasons&#39;")
                                     . " casts")
                 . "?show_id=" . $showdata['id'] . "'"
                     . " title='view this performance&#39;s cast'"
                     . "   alt='view this performance&#39;s cast'"
                 . "' class=viewall>Cast</a>";
- ?>
-    </div>	
+    echo '</div>';
+    
+    if(!empty($showdata['notes']))
+	{
+		echo '<div class="gig-note" ' 
+                . ( 1 < $condensed ?  "style='display:none;'" : "")
+                . ' id="gignote-' . $showdata['id'] . '">';
+		if(!empty($showdata['notes'])) 
+		    echo $showdata['notes']; 
+		echo "</div><!-- end gig-note --><br style='clear:both;'>";
+    } 
 
-	<div class="prog-note"
-		 <?php echo ( (0 < $condensed) || ( ! $new_program ) 
-		            ?  "style='display:none;'" : ""); ?>
-		    id="prog-note-<?php echo $showdata['id']; ?>"> <!--  prog-note -->
-<?php
+	echo '<div class="prog-note "'
+		 . ( (0 < $condensed) || ( ! $new_program ) 
+		            ?  "style='display:none;'" : "")
+		 . ' id="prog-note-' . $showdata['id'] . '"> <!-- start prog-note -->';
             echo $showdata['program_notes'];
 
 			echo '<div class="floatright prog-genres" >'
 					 . $showdata['program_genres'] . '</div><br>'; 
-	    echo "</div>";
 
-    if(!empty($showdata['notes'])
-		  or !empty($showdata['artist_url'])) : ?>
-		<div class="gig-note" 
-		<?php echo ( 1 < $condensed ?  "style='display:none;'" : ""); ?>
-		        id="gignote-<?php echo $showdata['id']; ?>" >
-			<?php if(!empty($showdata['notes'])) echo $showdata['notes']; ?>
-			<?php if(!empty($showdata['artist_url'])) : ?>
-				<a class="more-info" href="<?php echo $showdata['artist_url']; ?>" >read more...</a>
-	<?php endif; ?>	
-		</div>
-<?php endif; ?><!-- end gig-note -->
+	if(!empty($showdata['artist_url']))
+		echo '<a class="more-info" href="' . $showdata['artist_url']
+		        . '">read more...</a><!-- end artist_url -->';
 
-<?php if($showdata['related_link']
-		&& !empty($gpo['relatedlink_notes'])) : ?>
-		<div class="info-right related-link">
-			<?php echo $showdata['related_link']; ?>
-		</div> <!-- end related_link -->
-<?php endif; ?>			
-       
-<?php if($showdata['external_link']) : ?>
-		<div class="info-right external-link">
-			<?php echo $showdata['external_link']; ?>
-		</div> <!-- end external_link -->
-<?php endif; ?>	
+    if($showdata['related_link']
+		&& !empty($gpo['relatedlink_notes']))
+		echo '<div class="info-right related-link">'
+			. $showdata['related_link']
+			. '</div> <!-- end related_link -->';
 
-    </div>
+    if($showdata['external_link'])
+		echo '<div class="info-right external-link">'
+			. $showdata['external_link']
+		    . '</div> <!-- end external_link -->';
+?>
+    </div><!-- end prog-note -->
     
 <br clear=both>
 <hr>
