@@ -12,7 +12,7 @@
 			foreach($programs as $program) 
 				if (in_array($program->artist_id, $excluded_ids))
 						--$n;
-	    echo '<div class="embed-viewall">';
+	    echo '<div class="top-viewall">';
 		echo "<h3 class='gig-pup search-results'>" 
 		    . ($n   ? $n . " program" . ($n >1 ? "s" : '')
 			       	: "no programs")

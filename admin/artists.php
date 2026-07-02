@@ -88,24 +88,18 @@ function gigpress_artists()
 			<tr>
 				<th scope="row"><label for="program_notes"><?php _e("program notes", "gigpress"); ?>:</label></th>
 				<td>
-					<?php wp_editor(
-								(isset($artist->program_notes)
-									 ? $artist->program_notes
-									 : "Use this space to describe program"),
+					<?php wp_editor( $artist->program_notes ?: '',
 								"program_notes",
 								array('teeny' => true,'textarea_rows' => 10)
 						   ); ?>
+				    <br /><span class="description"><?php _e("Use this space to describe program; the 1st image will be displayed next to the name in performance listing", "gigpress"); ?> </span>
 				</td>
 			</tr>
 			<tr valign="top">
 			    <th scope="row"><?php _e( 'Genres', 'gigpress' ); ?></th>
 			    <td >
 			    	<?php gigpress_genre_checkboxes($artist_id); ?>
-<<<<<<< HEAD
-			    	<a href="https://bostoncamerata.org"/2021site/wp-admin/edit-tags.php?taxonomy=genre&post_type=recordings" style="float:right;">edit genres</a>
-=======
 			    	<a href="/2021site/wp-admin/edit-tags.php?taxonomy=genre&post_type=recordings" style="float:right;">edit genres</a>
->>>>>>> parent of 76fad1f (v2.3.29.5)
 			    </td>
 			</tr>
 			<tr>

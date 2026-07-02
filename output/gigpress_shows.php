@@ -94,7 +94,7 @@ function gigpress_shows( $filter = null, $content = null )
 	if($show_id)
 	{ 
 		$and_atv_conditions = ' AND show_id = '  . $wpdb->prepare('%d', $show_id);
-		echo "<style type='text/css'>.hero-image { display: none; } </style>";
+		echo "<style type='text/css'>.hero-image{ display: none; }</style><br>";
 		$group_artists = 'no';
 	}
 	else	// program, tour and venue filtering
@@ -102,7 +102,7 @@ function gigpress_shows( $filter = null, $content = null )
 		if($program_id)
 		{
 		    $and_atv_conditions .= ' AND show_artist_id = ' . $wpdb->prepare('%d', $program_id);
-		    echo "<style type='text/css'>.hero-image { display: none; } </style>";
+		    echo "<style type='text/css'>.hero-image{display:none;}</style><br>";
 		}
 		if($tour)
 			$and_atv_conditions .= ' AND show_tour_id = '   . $wpdb->prepare('%d', $tour);

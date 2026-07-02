@@ -400,7 +400,11 @@ function gigpress_add() {
 				<tr>
 					<th scope="row"><label for="program_notes"><?php _e("program notes", "gigpress"); ?>:</label></th>
 					<td>
-						<textarea name="program_notes" id="program_notes" cols="45" rows="5"><?php if(isset($program_notes)) echo $program_notes; ?></textarea><br /><span class="description"><?php _e("Use this space to describe program", "gigpress"); ?></span>
+					    <?php wp_editor( $artist->program_notes ?: '',
+								        "program_notes",
+								        array('teeny' => true,'textarea_rows' => 10)
+						   ); ?>
+                        <br /><span class="description"><?php _e("Use this space to describe program; the 1st image will be displayed next to the name in performance listing", "gigpress"); ?></span>
 					</td>
 				</tr>				
 				</tbody>
@@ -591,8 +595,8 @@ function gigpress_add() {
 				  <tr>
 					<th scope="row"><label for="show_notes"><?php _e("Notes", "gigpress") ?>:</label></th>
 					<td>
-						<textarea name="show_notes" id="show_notes" cols="45" rows="5" style="width:100%;" ><?php if(isset($show_notes)) echo $show_notes; ?></textarea><br />
-						<span class="description"><?php _e("Use this space to list other bands, 'presented by' info, etc", "gigpress"); ?></span>
+						<textarea name="show_notes" id="show_notes" cols="45" rows="5" style="width:100%;" ><?php echo ($show_notes ?:'' ); ?></textarea>
+				    	<span class="description"><?php _e("Use this space for performance-specific info; any links eg: to a program.pdf should be wrapped in '&lt;div class=embed-viewall&gt;&lt;a class=viewall href='pdf.url'&gt;program&lt;/a&gt;...&lt;/div&gt;&lt;p class=after-embed&gt;...' to appear as a button on right margin", "gigpress"); ?> </span>
 					</td>
 				  </tr>
 				  <tr>

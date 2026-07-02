@@ -34,12 +34,17 @@
     {
         $current_program = $showdata['artist_plain'];
  ?>
-		<a title='click to show/hide program description'
+		<div class=title-block>
+		    <a title='click to show/hide program description'
 						 href="#prog-<?php echo $showdata['id']; ?>"
 						onclick="return showInfo('prog-note-<?php echo $showdata['id']; ?>')" >
-			<h2 class="progtitle" >
-			    <?php echo bc_bankhead($current_program); ?>
-		</h2></a>
+		        <div class="progtitle-wrapper">
+		            <h2 class="progtitle" >
+		                <?php echo bc_bankhead($current_program); ?>
+		            </h2>
+	            </div>
+		    </a>
+		</div>
 <?php
     }
         echo '<div class="gig-date">';
@@ -138,9 +143,8 @@
 		echo '<div class="gig-note" ' 
                 . ( 1 < $condensed ?  "style='display:none;'" : "")
                 . ' id="gignote-' . $showdata['id'] . '">';
-		if(!empty($showdata['notes'])) 
 		    echo $showdata['notes']; 
-		echo "</div><!-- end gig-note --><br style='clear:both;'>";
+		echo "</div><!-- end gig-note -->";
     } 
 
 	echo '<div class="prog-note "'
@@ -149,8 +153,8 @@
 		 . ' id="prog-note-' . $showdata['id'] . '"> <!-- start prog-note -->';
             echo $showdata['program_notes'];
 
-			echo '<div class="floatright prog-genres" >'
-					 . $showdata['program_genres'] . '</div><br>'; 
+		echo '<div class="prog-genre info-right" >' 
+		            . $showdata['program_genres'] . '</div>'; 
 
 	if(!empty($showdata['artist_url']))
 		echo '<a class="more-info" href="' . $showdata['artist_url']
@@ -169,6 +173,6 @@
 ?>
     </div><!-- end prog-note -->
     
-<br clear=both>
+<br class=clear-both>
 <hr>
 <!-- end gigpress shows-list -->
