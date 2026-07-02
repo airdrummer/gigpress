@@ -138,9 +138,8 @@
 		echo '<div class="gig-note" ' 
                 . ( 1 < $condensed ?  "style='display:none;'" : "")
                 . ' id="gignote-' . $showdata['id'] . '">';
-		if(!empty($showdata['notes'])) 
 		    echo $showdata['notes']; 
-		echo "</div><!-- end gig-note --><br style='clear:both;'>";
+		echo "</div><!-- end gig-note -->";
     } 
 
 	echo '<div class="prog-note "'
