@@ -8,7 +8,7 @@
     	if ( ($program_id && $show_id) || ($scope == 'past'))
         	echo "<a href='/performances/"
         	            . "?program_id=" . $program_id 
-        	            . "&condensed=2" . "'" 
+        	            . "&condensed=1" . "'" 
                     . " title='view upcoming shows of this program'"
                     . "   alt='view upcoming shows of this program'"
     		            . " class='viewall'>upcoming shows</a>";
