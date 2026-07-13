@@ -91,7 +91,7 @@ function gigpress_shows( $filter = null, $content = null )
 					   : $wpdb->get_var("SELECT count(*) from " . GIGPRESS_ARTISTS));
 
 	$and_atv_conditions = '';
-	if($show_id)
+	if($show_id && ! $program_id)
 	{ 
 		$and_atv_conditions = ' AND show_id = '  . $wpdb->prepare('%d', $show_id);
 		echo "<style type='text/css'>.hero-image{ display: none; }</style><br>";
