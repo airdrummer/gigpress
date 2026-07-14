@@ -306,7 +306,7 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
     	echo "<div class=" . ($past ? "past" : "upcoming") . "-casts>";
 	
 	    $click_what =  "click to display this performance&#39;s cast"; // for title links
-	    $what = ( ! $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
+	    $what = ( ! $past ? "this season&#39;s" : "past") . " casts";
         $where = sanitize_title($what); //-hardcoded path-\
 
 	    $previous_show = (object) ['artist_name' => '']; // initial for compare
@@ -337,9 +337,9 @@ function bc_list_upcoming_casts_shortcode( $atts, $content=null )
 
 	$click_what =  "click to display this "
                     . ( $past ? "program" : "performance") . "&#39;s " 
-                    . ( $past ? "current season&#39;s" : "past seasons&#39;")
+                    . ( $past ? "current season&#39;s" : "past")
                     . " casts" ; // for title links
- 	$what  = ( $past ? "this season&#39;s" : "past seasons&#39;") . " casts";
+ 	$what  = ( $past ? "this season&#39;s" : "past") . " casts";
     $where = sanitize_title($what); //-hardcoded path-\
     echo  "<div class='top-viewall'><a class='viewall' href='/about/company-collaborators/" . $where . "'"
                         . " title='$click_what'"

@@ -97,9 +97,9 @@ function bc_musician_list( $show_id, $past, $revealheadshot, $allow_initial_desk
 		         . "  alt='click to view programs&#39;s description'" . " >"; 
 		    echo "<a href=/performances/"
 			            		. ($past 
-			            			? "past-performances/?condensed=2" 
-			            			: '?condensed=0')
-		    	           	. "&program_id=" . $program_id
+			            			? "past-performances/" 
+			            			: '')
+		    	           	. "?condensed=0&program_id=" . $program_id
 			    	           . "&show_id="    . $show_id . "'>";
 		        echo $show_title;
 		echo "</a></h2><hr>";
