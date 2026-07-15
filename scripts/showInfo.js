@@ -1,7 +1,7 @@
 <!-- 
 	include GIGPRESS_PLUGIN_DIR . '/scripts/showInfo.js';
   -->
-  
+
 <script type="text/javascript">
 	var currentInfo = null;
 	function showInfo(id)

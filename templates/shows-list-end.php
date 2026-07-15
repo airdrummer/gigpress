@@ -33,7 +33,7 @@
     	    echo "<a href='/about/company-collaborators/"
         	        . ($scope == 'past'
         	            ? "this-seasons-casts" 
-        	            : 'past-seasons-casts')
+        	            : 'past-casts')
     		        . "/?program_id=" . $program_id . "'"
                     . " title='view $scope_str casts of this program'"
                     . "   alt='view $scope_str casts of this program'"

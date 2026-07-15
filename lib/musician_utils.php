@@ -150,7 +150,8 @@ function generate_musician_list($args, $instruments, $revealheadshot)
 							trim(get_field( 'first_name', $musician_id ) . ' ' 
 								. get_field( 'last_name',  $musician_id )));
 
-		echo '<details class="cast-member-row"' . ($revealheadshot ? "" : " open") . '>';
+		echo '<details class="cast-member-row"' 
+		        . ($revealheadshot ? "" : " open") . '>';
 		echo '<summary><div class="cast-header">';
 	    echo '<h2>' . esc_html($name) . '</h2>';
 	    echo '<div class="instruments">';
